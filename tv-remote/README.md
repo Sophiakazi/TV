@@ -26,4 +26,4 @@ The remote learns the TV's MAC address after the first connection.
 - Anyone on your Wi-Fi who opens the address can use the remote. Don't expose it to the internet.
 - It can't change picture/sound settings directly (LG blocks that); the gear button opens the TV's own settings.
 - "Search" opens the TV's web browser on a search page. Use "Type on TV" to fill in the search box inside an app.
-- The Mac must be on and running `node server.js` while you use the remote.
+- The Mac must be on and running the server while you use the remote. Run `./autostart.sh` once and it starts by itself whenever you log in (`./autostart.sh off` stops that).

@@ -22,6 +22,18 @@ node server.js
 
 Open the address it prints on your phone (same Wi-Fi). The first time, accept the pairing request on the TV.
 
+To have the Mac start the server by itself whenever you log in, and restart it if it stops:
+
+```bash
+cd tv-remote
+./autostart.sh
+```
+
+- `./autostart.sh off` turns that off.
+- `./autostart.sh restart` restarts the server, which it needs after you edit `backgrounds.json`.
+- `./autostart.sh status` shows whether it's running.
+- The server's messages go to `~/Library/Logs/tv-remote.log`.
+
 The show rows need a free TMDB key. Put your TMDB "API Read Access Token" in `tv-remote/.tmdb-key`. That file is never committed.
 
 ## Install on the TV
