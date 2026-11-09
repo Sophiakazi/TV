@@ -4,7 +4,7 @@ A phone remote for your LG TV: d-pad, volume, channels, apps (Netflix, Disney+, 
 
 ## Start it (on your Mac, same Wi-Fi as the TV and your phone)
 
-    cd ~/Desktop/tv-remote
+    cd tv-remote
     node server.js
 
 It prints an address like `http://192.168.1.50:8787`. Open that on your phone. Add it to your Home Screen for an app-like icon.
