@@ -894,10 +894,30 @@
       t.addEventListener('click', (e) => { e.preventDefault(); launch(t); });
     });
   }
-  let lastSig = '';
+  let lastSig = '', showsRetry = null;
+  // The TV keeps the last show lists the Mac sent, so the rows (Top 10, Recommended...) stay up
+  // while the Mac or its server is off. They refresh as soon as the server answers again.
+  const SHOWS_KEY = 'tvhome.shows', SHOWS_KEEP = 7 * 24 * 3600 * 1000;   // a saved copy is used for up to a week
+  const savedShows = () => { try { const c = JSON.parse(localStorage.getItem(SHOWS_KEY) || 'null'); return c && c.d && Date.now() - c.t < SHOWS_KEEP ? c.d : null; } catch (e) { return null; } };
+  const hasShows = (d) => !!d && ['top10', 'recommended', 'watching'].some((k) => (d[k] || []).length);
+  const getJSON = (url, ms) => Promise.race([
+    fetch(url).then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+    new Promise((ok, no) => setTimeout(() => no(new Error('timeout')), ms))]);
   async function loadShows(force) {
+    let d;
+    clearTimeout(showsRetry);
     try {
-      const d = await (await fetch(REMOTE_URL + '/api/shows')).json();
+      d = await getJSON(REMOTE_URL + '/api/shows', 10000);
+      if (hasShows(d)) { try { localStorage.setItem(SHOWS_KEY, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {} }
+    } catch (e) {
+      showsRetry = setTimeout(loadShows, 15 * 1000);   // the Mac isn't answering: try again in 15 seconds
+      if (lastSig) return;                              // and keep what's already on screen
+      d = savedShows(); if (!d) return;
+    }
+    showShows(d, force);
+  }
+  function showShows(d, force) {
+    try {
       const sig = JSON.stringify(d);
       if (!force && sig === lastSig) return;          // nothing changed
       if (!force && row >= 1 && rows.length > 2) return;                  // don't rebuild while you're browsing; try again next time
@@ -935,6 +955,7 @@
       else if (row >= 1) row = rows.length - 1;   // you were on the inputs row while the shows were still loading
     } catch (e) {}
   }
+  { const saved = savedShows(); if (saved) showShows(saved); }   // show the last lists straight away, then fetch fresh ones
   loadShows(); setInterval(loadShows, 60 * 1000);
 
 
