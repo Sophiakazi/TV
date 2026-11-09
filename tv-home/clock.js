@@ -1,8 +1,12 @@
 // Liquid-Glass clock (in the style of the iOS 26 lock screen, clear glass).
-// Each digit is a clear lens: you see the wallpaper straight through it, slightly magnified,
-// and bent more strongly just inside the edges, the way thick glass bends light. A faint tint,
-// a bright rim that catches a slowly moving light (like tilting a phone), a soft edge and a
-// drifting glint finish it. Digits that change roll in, like iOS.
+// Each digit is a clear lens: you see the wallpaper straight through it, slightly magnified, and bent
+// more strongly just inside the edges, the way thick glass bends light.
+// The edge is measured from a close-up of Apple's clock (sizes are shares of the digit height):
+//  - a thin dark line hugging the outside of every digit (0.7%)
+//  - a crisp near-white line just inside the top and bottom edges (0.7%), a softer one inside the left edges
+//  - light pooling just inside the bottom edges (3.5%), a soft glow inside the left edges,
+//    and a little shade inside the right edges
+// A glint drifts slowly along the rim (like tilting a phone). Digits that change roll in, like iOS.
 (function () {
   const NS = 'http://www.w3.org/2000/svg', XL = 'http://www.w3.org/1999/xlink';
   const FONTS = {
@@ -11,7 +15,7 @@
     classic:   { family: '-apple-system, "Helvetica Neue", Arial, sans-serif', weight: 800, cap: 0.72 },
     serif:     { family: 'Georgia, "Times New Roman", serif', weight: 700, cap: 0.70 }
   };
-  let host, glass, svg, gG, clip, hair, lens, tintImg = '', edgeStops = [], rimDarkStops = [], chars = [], text = '', geo = null;
+  let host, glass, svg, gl, gG, clip, hair, lens, lensTint, lensMilk, tintLayers = [], chars = [], text = '', geo = null;
   const natural = {};   // wallpaper file -> its pixel size (to line the lens up with the screen)
   let style = { font: 'condensed', stretch: 28, tint: '#a8e1ff', glass: 60, style: 'glass' };
   const mctx = document.createElement('canvas').getContext('2d');
@@ -26,7 +30,6 @@
   };
   const rgb = (h) => { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
   const rgba = (h, a) => 'rgba(' + rgb(h).join(',') + ',' + a + ')';
-  const shade = (h, f, a) => 'rgba(' + rgb(h).map((v) => Math.round(v * f)).join(',') + ',' + a + ')';
   const stop = (o, c, a) => el('stop', { offset: o, 'stop-color': c, 'stop-opacity': a });
   const ease = { calcMode: 'spline', keyTimes: '0;0.5;1', keySplines: '.45 0 .55 1;.45 0 .55 1', repeatCount: 'indefinite' };
 
@@ -36,60 +39,60 @@
     host.textContent = '';
     glass = document.createElement('div'); glass.className = 'clk-glass';
     svg = el('svg', { class: 'clk-fx', 'aria-hidden': 'true' });
+    gl = el('svg', { class: 'clk-fx', 'aria-hidden': 'true' });   // the moving glint, kept apart so the rest stays still
+    svg.style.willChange = 'transform';
     gG = el('g', { id: 'clkG' });
     clip = el('clipPath', { id: 'clkClip' });
     const full = () => el('rect', { class: 'full', x: 0, y: 0 });
+    const useG = (a) => el('use', Object.assign({ href: '#clkG' }, a));
+    const paint = (f, op, m) => { const r = full(); r.setAttribute('fill', f); if (op != null) r.setAttribute('opacity', op); if (m) r.setAttribute('mask', 'url(#' + m + ')'); return r; };
+    const mask = (id, kids) => el('mask', { id: id, maskUnits: 'userSpaceOnUse' }, kids);
+    // the part of each digit within a set distance of the edges facing one way: the digit minus a copy of itself
+    // nudged that way, so the band follows every curve and thins out where the edge turns away from that side
+    const band = (id, cls) => mask(id, [useG({ fill: '#fff' }), useG({ fill: '#000', class: cls })]);
 
-    // light that sways back and forth across the rims (the "tilt")
-    const sway = () => el('animateTransform', Object.assign({ attributeName: 'gradientTransform', type: 'rotate', values: '-58 .5 .5;58 .5 .5;-58 .5 .5', dur: '14s' }, ease));
-    const gLight = el('linearGradient', { id: 'clkLight', x1: 0, y1: 0, x2: 1, y2: 1 }, [stop(0, '#fff', 1), stop(0.38, '#fff', 0.5), stop(0.7, '#fff', 0.06), stop(1, '#fff', 0), sway()]);
-    const gLight2 = el('linearGradient', { id: 'clkLight2', x1: 1, y1: 1, x2: 0, y2: 0 }, [stop(0, '#fff', 0.42), stop(0.3, '#fff', 0.1), stop(0.6, '#fff', 0), sway()]);
-    // the outer edge: barely there on the lit side, a deeper shade of the tint on the far side (like real glass)
-    edgeStops = [stop(0, '#000', 0.1), stop(0.6, '#000', 0.35), stop(1, '#000', 0.8)];
-    const gEdge = el('linearGradient', { id: 'clkEdge', x1: 0.2, y1: 0, x2: 0.8, y2: 1 }, edgeStops);
-    rimDarkStops = [stop(0, '#000', 0), stop(0.55, '#000', 0), stop(1, '#000', 0.2)];
-    const gDark = el('linearGradient', { id: 'clkDark', x1: 0, y1: 0, x2: 1, y2: 1 }, rimDarkStops.concat([sway()]));
-    const gSheen = el('linearGradient', { id: 'clkSheen', x1: 0, y1: 0, x2: 0, y2: 1 }, [stop(0, '#fff', 0.14), stop(0.35, '#fff', 0), stop(0.8, '#fff', 0), stop(1, '#fff', 0.06)]);
-    const gSpec = el('radialGradient', { id: 'clkSpec', cx: 0.25, cy: 0.08, r: 0.3 }, [stop(0, '#fff', 0.55), stop(0.4, '#fff', 0.12), stop(1, '#fff', 0),
-      el('animate', Object.assign({ attributeName: 'cx', values: '.12;.88;.12', dur: '14s' }, ease)),
-      el('animate', Object.assign({ attributeName: 'cy', values: '.04;.26;.04', dur: '14s' }, ease))]);
-    const fRim = el('filter', { id: 'clkRimSoft', x: '-10%', y: '-10%', width: '120%', height: '120%' }, [el('feGaussianBlur', { class: 'rimsoft', stdDeviation: 0.8 })]);
+    const fSoft = el('filter', { id: 'clkSoft', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [el('feGaussianBlur', { class: 'soft', stdDeviation: 2 })]);
+    const fCrisp = el('filter', { id: 'clkCrisp', x: '-10%', y: '-10%', width: '120%', height: '120%' }, [el('feGaussianBlur', { class: 'crisp', stdDeviation: 0.4 })]);
+    const fShadow = el('filter', { id: 'clkShadow', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [el('feGaussianBlur', { class: 'shadowblur', stdDeviation: 4 })]);
     // the view through the glass edge comes out a touch brighter, as it does through real glass
     const fTone = el('filter', { id: 'clkTone' }, [el('feComponentTransfer', {}, ['R', 'G', 'B'].map((c) => el('feFunc' + c, { type: 'linear', slope: 1.12, intercept: 0.02 })))]);
-    const fSoft = el('filter', { id: 'clkSoft', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [el('feGaussianBlur', { class: 'soft', stdDeviation: 2 })]);
-    const fShadow = el('filter', { id: 'clkShadow', x: '-20%', y: '-20%', width: '140%', height: '140%' }, [el('feGaussianBlur', { class: 'shadowblur', stdDeviation: 4 })]);
-    const useG = (a) => el('use', Object.assign({ href: '#clkG' }, a));
-    const mBody = el('mask', { id: 'clkBody', maskUnits: 'userSpaceOnUse' }, [useG({ fill: '#fff' })]);
-    const mOut = el('mask', { id: 'clkOut', maskUnits: 'userSpaceOnUse' }, [Object.assign(full(), {}), useG({ fill: '#000' })]);
-    mOut.firstChild.setAttribute('fill', '#fff');
-    const mRim = el('mask', { id: 'clkRim', maskUnits: 'userSpaceOnUse' }, [useG({ fill: 'none', stroke: '#fff', class: 'sw-rim', 'stroke-linejoin': 'round' })]);
-    const mBev = el('mask', { id: 'clkBev', maskUnits: 'userSpaceOnUse' }, [useG({ fill: 'none', stroke: '#fff', class: 'sw-bev', 'stroke-linejoin': 'round' })]);
-    const mLens = el('mask', { id: 'clkLens', maskUnits: 'userSpaceOnUse' }, [useG({ fill: 'none', stroke: '#fff', class: 'sw-lens', 'stroke-linejoin': 'round', filter: 'url(#clkSoft)' })]);
-    const band = (id, cls) => el('mask', { id: id, maskUnits: 'userSpaceOnUse' }, [useG({ fill: '#fff' }), useG({ fill: '#000', class: cls })]);
-    const mBottom = band('clkBotBand', 'sh-b'), mLeft = band('clkLeftBand', 'sh-l'), mRight = band('clkRightBand', 'sh-r');
-    svg.appendChild(el('defs', {}, [gG, clip, gLight, gLight2, fRim, fTone, gEdge, gDark, gSheen, gSpec, fSoft, fShadow, mBody, mOut, mRim, mBev, mLens, mBottom, mLeft, mRight]));
+    const gSheen = el('linearGradient', { id: 'clkSheen', x1: 0, y1: 0, x2: 0, y2: 1 }, [stop(0, '#fff', 0.1), stop(0.4, '#fff', 0), stop(1, '#fff', 0)]);
+    const mOut = mask('clkOut', [paint('#fff'), useG({ fill: '#000' })]);
+    const mBody = mask('clkBody', [useG({ fill: '#fff' })]);
+    const mLens = mask('clkLens', [useG({ fill: 'none', stroke: '#fff', class: 'sw-lens', 'stroke-linejoin': 'round', filter: 'url(#clkSoft)' })]);
+    const bands = [['clkGlowB', 'sh-gb'], ['clkGlowB2', 'sh-gb2'], ['clkGlowL', 'sh-gl'], ['clkShadeR', 'sh-sr'], ['clkShadeR2', 'sh-sr2'],
+      ['clkRimT', 'sh-rt'], ['clkRimB', 'sh-rb'], ['clkRimL', 'sh-rl']].map((b) => band(b[0], b[1]));
+    svg.appendChild(el('defs', {}, [gG, clip, gSheen, fSoft, fCrisp, fShadow, fTone, mOut, mBody, mLens].concat(bands)));
 
-    // soft shadow below the glass (outside the digits only)
-    svg.appendChild(el('g', { mask: 'url(#clkOut)' }, [el('g', { class: 'shadow' }, [useG({ fill: 'rgba(4,14,34,.14)', filter: 'url(#clkShadow)' })])]));
-    // thin dark edge, just outside the glass
-    hair = useG({ fill: 'none', stroke: 'rgba(0,0,0,.16)', class: 'sw-hair', 'stroke-linejoin': 'round' });
+    // a faint soft shadow under the digits (outside only)
+    svg.appendChild(el('g', { mask: 'url(#clkOut)' }, [el('g', { class: 'shadow' }, [useG({ fill: 'rgba(4,14,34,.06)', filter: 'url(#clkShadow)' })])]));
+    // the thin dark line hugging every digit, just outside the glass
+    hair = useG({ fill: 'none', stroke: 'rgba(0,0,0,.38)', class: 'sw-hair', 'stroke-linejoin': 'round' });
     svg.appendChild(el('g', { mask: 'url(#clkOut)' }, [hair]));
-    // the background seen through the edge of the glass: bent (magnified) much more strongly than in the middle
+    // the background seen through the edge of the glass: bent (magnified) much more strongly than in the middle,
+    // with the same tint as the rest of the glass
     lens = el('image', { class: 'lens', preserveAspectRatio: 'none', x: 0, y: 0, width: 1, height: 1, opacity: 0, filter: 'url(#clkTone)' });
-    svg.appendChild(el('g', { mask: 'url(#clkBody)' }, [el('g', { mask: 'url(#clkLens)' }, [lens])]));
-    // light inside the glass
-    const sheen = full(); sheen.setAttribute('fill', 'url(#clkSheen)');
-    const bev = full(); bev.setAttribute('fill', '#fff'); bev.setAttribute('opacity', '.08'); bev.setAttribute('mask', 'url(#clkBev)');
-    const dark = full(); dark.setAttribute('fill', 'url(#clkDark)'); dark.setAttribute('mask', 'url(#clkBev)'); dark.setAttribute('opacity', '0');
-    const glowB = full(); glowB.setAttribute('fill', '#fff'); glowB.setAttribute('opacity', '.18'); glowB.setAttribute('mask', 'url(#clkBotBand)');
-    const glowL = full(); glowL.setAttribute('fill', '#fff'); glowL.setAttribute('opacity', '.1'); glowL.setAttribute('mask', 'url(#clkLeftBand)');
-    const shadeR = full(); shadeR.setAttribute('fill', '#000'); shadeR.setAttribute('opacity', '.1'); shadeR.setAttribute('mask', 'url(#clkRightBand)');
-    const rim = full(); rim.setAttribute('fill', 'url(#clkLight)'); rim.setAttribute('mask', 'url(#clkRim)');
-    const rim2 = full(); rim2.setAttribute('fill', 'url(#clkLight2)'); rim2.setAttribute('mask', 'url(#clkRim)');
-    const spec = full(); spec.setAttribute('fill', 'url(#clkSpec)');
-    svg.appendChild(el('g', { mask: 'url(#clkBody)' }, [sheen, el('g', { filter: 'url(#clkSoft)' }, [bev, glowB, glowL, shadeR]), dark, el('g', { filter: 'url(#clkRimSoft)' }, [rim, rim2]), spec]));
+    lensTint = paint('#fff', 0); lensMilk = paint('#fff', 0);
+    svg.appendChild(el('g', { mask: 'url(#clkBody)' }, [el('g', { mask: 'url(#clkLens)', class: 'lensband' }, [lens, lensTint, lensMilk])]));
+    // light inside the glass (measured from Apple's clock): light pooling at the bottom, a soft glow at the left,
+    // a little shade at the right, then the crisp bright lines
+    svg.appendChild(el('g', { mask: 'url(#clkBody)' }, [
+      paint('url(#clkSheen)'),
+      el('g', { filter: 'url(#clkSoft)' }, [paint('#fff', 0.14, 'clkGlowB'), paint('#fff', 0.18, 'clkGlowB2'), paint('#fff', 0.08, 'clkGlowL'),
+        paint('#000', 0.06, 'clkShadeR'), paint('#000', 0.09, 'clkShadeR2')]),
+      el('g', { filter: 'url(#clkCrisp)' }, [paint('#fff', 0.9, 'clkRimT'), paint('#fff', 0.92, 'clkRimB'), paint('#fff', 0.38, 'clkRimL')])
+    ]));
 
-    host.appendChild(glass); host.appendChild(svg);
+    // the glint that drifts slowly along the rim, like light moving across glass as a phone tilts
+    const gSpec = el('radialGradient', { id: 'clkSpec', cx: 0.25, cy: 0.08, r: 0.3 }, [stop(0, '#fff', 0.6), stop(0.4, '#fff', 0.14), stop(1, '#fff', 0),
+      el('animate', Object.assign({ attributeName: 'cx', values: '.12;.88;.12', dur: '14s' }, ease)),
+      el('animate', Object.assign({ attributeName: 'cy', values: '.04;.26;.04', dur: '14s' }, ease))]);
+    const mRim = mask('clkRim', [useG({ fill: 'none', stroke: '#fff', class: 'sw-rim', 'stroke-linejoin': 'round' })]);
+    const mBodyG = mask('clkBodyG', [useG({ fill: '#fff' })]);
+    gl.appendChild(el('defs', {}, [gSpec, mRim, mBodyG]));
+    gl.appendChild(el('g', { mask: 'url(#clkBodyG)' }, [paint('url(#clkSpec)', 1, 'clkRim')]));
+
+    host.appendChild(glass); host.appendChild(svg); host.appendChild(gl);
     return true;
   }
 
@@ -132,21 +135,25 @@
     const W = Math.ceil(x + p * 2), H = Math.ceil((A + D) * s + p * 2), GH = A * s;
     geo = { fs: fs, s: s, A: A, p: p };
     host.style.width = W + 'px'; host.style.height = H + 'px';
-    svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
-    svg.setAttribute('font-family', F.family); svg.setAttribute('font-weight', F.weight); svg.setAttribute('font-size', fs.toFixed(2));
-    svg.querySelectorAll('rect.full').forEach((r) => { r.setAttribute('width', W); r.setAttribute('height', H); });
-    const w = (cls, v) => svg.querySelectorAll('.' + cls).forEach((e) => e.setAttribute('stroke-width', v.toFixed(2)));
-    w('sw-hair', Math.max(2, GH * 0.012));
-    w('sw-rim', Math.max(2.6, GH * 0.016));
-    svg.querySelector('.rimsoft').setAttribute('stdDeviation', Math.max(0.6, GH * 0.0045).toFixed(2));
-    w('sw-bev', Math.max(5, GH * 0.06));
-    w('sw-lens', Math.max(8, GH * 0.1));
-    svg.querySelector('.soft').setAttribute('stdDeviation', Math.max(1.5, GH * 0.022).toFixed(2));
-    svg.querySelectorAll('.sh-b').forEach((e) => e.setAttribute('transform', 'translate(0,' + (-GH * 0.04).toFixed(2) + ')'));
-    svg.querySelectorAll('.sh-l').forEach((e) => e.setAttribute('transform', 'translate(' + (GH * 0.05).toFixed(2) + ',0)'));
-    svg.querySelectorAll('.sh-r').forEach((e) => e.setAttribute('transform', 'translate(' + (-GH * 0.03).toFixed(2) + ',0)'));
-    svg.querySelector('.shadowblur').setAttribute('stdDeviation', Math.max(2, GH * 0.012).toFixed(2));
-    svg.querySelector('g.shadow').setAttribute('transform', 'translate(0,' + Math.max(2, GH * 0.012).toFixed(2) + ')');
+    [svg, gl].forEach((e) => {
+      e.setAttribute('width', W); e.setAttribute('height', H); e.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      e.setAttribute('font-family', F.family); e.setAttribute('font-weight', F.weight); e.setAttribute('font-size', fs.toFixed(2));
+    });
+    host.querySelectorAll('rect.full').forEach((r) => { r.setAttribute('width', W); r.setAttribute('height', H); });
+    const px = (f, min) => Math.max(min, GH * f);   // a share of the digit height, never thinner than min pixels
+    const sw = (cls, v) => host.querySelectorAll('.' + cls).forEach((e) => e.setAttribute('stroke-width', v.toFixed(2)));
+    sw('sw-hair', 2 * px(0.0105, 1.2));  // half of this stroke shows, outside the edge
+    sw('sw-rim', 2 * px(0.012, 1));
+    sw('sw-lens', px(0.1, 8));
+    host.querySelector('.soft').setAttribute('stdDeviation', px(0.011, 0.8).toFixed(2));
+    host.querySelector('.crisp').setAttribute('stdDeviation', px(0.0012, 0.25).toFixed(2));
+    const nudge = (cls, dx, dy) => host.querySelectorAll('.' + cls).forEach((e) => e.setAttribute('transform', 'translate(' + dx.toFixed(2) + ',' + dy.toFixed(2) + ')'));
+    nudge('sh-gb', 0, -px(0.035, 3)); nudge('sh-gb2', 0, -px(0.014, 1.5));   // light pooling inside the bottom edges
+    nudge('sh-gl', px(0.03, 2.5), 0);                                      // soft glow inside the left edges
+    nudge('sh-sr', -px(0.03, 2.5), 0); nudge('sh-sr2', -px(0.012, 1), 0);   // shade inside the right edges
+    nudge('sh-rt', 0, px(0.009, 1)); nudge('sh-rb', 0, -px(0.009, 1)); nudge('sh-rl', px(0.006, 0.8), 0);   // the crisp bright lines
+    host.querySelector('.shadowblur').setAttribute('stdDeviation', px(0.012, 2).toFixed(2));
+    host.querySelector('g.shadow').setAttribute('transform', 'translate(0,' + px(0.012, 2).toFixed(2) + ')');
     host.style.setProperty('--clk-blur', style.style === 'solid' ? '0px' : '2px');
     chars.forEach((c) => { if (!c.out) place(c, c.entering ? 'in' : '', false); });
     lensLayout();
@@ -154,19 +161,20 @@
 
   // Line the wallpaper up behind the clock, magnified around the clock's centre (m = how strongly the glass bends)
   function lensLayout() {
-    const bg = window.__bgFile, nat = bg && natural[bg];
+    const bg = window.__bgFile, nat = bg && natural[bg], band = svg.querySelector('.lensband');
     if (style.style === 'solid' || !nat) {
       glass.style.backgroundImage = ''; glass.style.backgroundSize = ''; glass.style.backgroundPosition = '';
-      host.classList.remove('lensed'); lens.setAttribute('opacity', '0'); return;
+      host.classList.remove('lensed'); lens.setAttribute('opacity', '0'); band.style.display = 'none'; return;
     }
+    band.style.display = '';
     const r = host.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight;
     const sc = Math.max(W / nat.w, H / nat.h), dw = nat.w * sc, dh = nat.h * sc, dx = (W - dw) / 2, dy = (H - dh) / 2;   // the photo is "cover"-fitted
     const Cx = r.left + r.width / 2, Cy = r.top + r.height / 2;
     const at = (m) => ({ x: Cx - r.left - m * (Cx - dx), y: Cy - r.top - m * (Cy - dy), w: dw * m, h: dh * m });
-    const body = at(1.06), edge = at(1.3);
-    glass.style.backgroundImage = tintImg + ', url("' + bg + '")';
-    glass.style.backgroundSize = '100% 100%, ' + body.w.toFixed(1) + 'px ' + body.h.toFixed(1) + 'px';
-    glass.style.backgroundPosition = '0 0, ' + body.x.toFixed(1) + 'px ' + body.y.toFixed(1) + 'px';
+    const body = at(1.06), edge = at(1.3), n = tintLayers.length;
+    glass.style.backgroundImage = tintLayers.concat(['url("' + bg + '")']).join(', ');
+    glass.style.backgroundSize = Array(n).fill('100% 100%').concat([body.w.toFixed(1) + 'px ' + body.h.toFixed(1) + 'px']).join(', ');
+    glass.style.backgroundPosition = Array(n).fill('0 0').concat([body.x.toFixed(1) + 'px ' + body.y.toFixed(1) + 'px']).join(', ');
     glass.style.backgroundRepeat = 'no-repeat';
     host.classList.add('lensed');
     if (lens.getAttribute('data-src') !== bg) { lens.setAttribute('href', bg); lens.setAttributeNS(XL, 'xlink:href', bg); lens.setAttribute('data-src', bg); }
@@ -186,15 +194,19 @@
   function paint() {
     if (!host && !build()) return;
     const t = style.tint, solid = style.style === 'solid';
-    if (solid) host.style.setProperty('--clk-tint', rgba(t, 0.97));
+    if (solid) { tintLayers = []; host.style.setProperty('--clk-tint', rgba(t, 0.97)); }
     else {
-      const a = 0.3 - 0.25 * (style.glass / 100);   // clear glass: just a wash of colour (higher "Glass" = clearer)
-      tintImg = 'linear-gradient(180deg,' + rgba(t, Math.min(1, a + 0.06)) + ' 0%,' + rgba(t, a) + ' 100%)';
-      host.style.setProperty('--clk-tint', tintImg);
+      // clear glass: a wash of colour plus a little milkiness. "Glass" on the phone: 100 = nearly clear,
+      // 0 = pale and milky like Apple's light tints
+      const g = Math.max(0, Math.min(1, style.glass / 100)), a = 0.42 - 0.36 * g, milk = 0.36 * (1 - g);
+      tintLayers = ['linear-gradient(180deg,' + rgba(t, Math.min(1, a + 0.06)) + ' 0%,' + rgba(t, a) + ' 100%)',
+        'linear-gradient(rgba(255,255,255,' + milk.toFixed(3) + '),rgba(255,255,255,' + milk.toFixed(3) + '))'];
+      host.style.setProperty('--clk-tint', tintLayers.join(', '));
+      lensTint.setAttribute('fill', t); lensTint.setAttribute('opacity', (a + 0.03).toFixed(3));
+      lensMilk.setAttribute('opacity', milk.toFixed(3));
     }
     host.classList.toggle('solid', solid);
-    hair.setAttribute('stroke', solid ? 'rgba(0,0,0,.22)' : 'rgba(0,0,0,0)');
-    rimDarkStops.forEach((s) => s.setAttribute('stop-color', shade(t, 0.3, 1)));
+    hair.setAttribute('stroke', solid ? 'rgba(0,0,0,.26)' : 'rgba(0,0,0,.3)');
   }
 
   function setText(str) {
