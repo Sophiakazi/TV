@@ -1,0 +1,1 @@
+{"name":"tv-remote","version":"1.0.0","private":true,"type":"commonjs","scripts":{"start":"node server.js"},"dependencies":{"lgtv2":"^2.1.0","ws":"^8.22.2"}}

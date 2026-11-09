@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home</title>
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased; color: #fff; overflow: hidden; background: #000;
+  }
+
+  /* ---- wallpaper: desert at dusk (swap for a real photo with: background: url(photo.jpg) center/cover) ---- */
+  .wall { position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(60vw 12vh at 46% 55%, rgba(255,255,255,.9), rgba(255,220,160,.5) 30%, transparent 70%),
+      radial-gradient(90vw 30vh at 20% 82%, #7a3d22 0%, transparent 70%),
+      radial-gradient(70vw 26vh at 85% 70%, #a8552b 0%, transparent 70%),
+      linear-gradient(180deg, #2f6cb8 0%, #6e9bd0 28%, #bcd0e6 46%, #e7b98a 55%, #c4703a 62%, #8c4526 80%, #4f2616 100%);
+  }
+  .wall::before { content: ""; position: absolute; inset: 0; opacity: .5;
+    background:
+      radial-gradient(40vw 7vh at 25% 18%, rgba(255,255,255,.55), transparent 70%),
+      radial-gradient(50vw 8vh at 60% 26%, rgba(255,255,255,.4), transparent 70%),
+      radial-gradient(35vw 6vh at 85% 14%, rgba(255,255,255,.35), transparent 70%); }
+  .wall::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,.25), transparent 22%, transparent 55%, rgba(0,0,0,.45)); }
+
+  /* optional photo slideshow + looping video (set in the script below) */
+  .bgimg { position: fixed; inset: 0; z-index: 0; background: center / cover no-repeat; opacity: 0; transition: opacity 2.5s ease; }
+  .bgimg.on { opacity: 1; }
+  #bgv { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  .bgimg::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,.25), transparent 22%, transparent 55%, rgba(0,0,0,.45)); }
+
+  .screen { position: relative; z-index: 1; height: 100%; }
+
+  .pill { position: absolute; left: 3.6vw; top: 4.4vh; padding: 1vh 1.8vw; border-radius: 99px; font-size: 1.7vw; font-weight: 500;
+    background: rgba(255,255,255,.16); -webkit-backdrop-filter: blur(30px) saturate(1.8); backdrop-filter: blur(30px) saturate(1.8);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+  /* ---- top left ---- */
+  .brand { position: absolute; left: 3.6vw; top: 4.4vh; display: flex; align-items: center; gap: .9vw;
+    font-size: 1.9vw; font-weight: 500; text-shadow: 0 .1vw .6vw rgba(0,0,0,.35); }
+  .brand svg { width: 2.8vw; height: 2.8vw; opacity: .85; }
+
+  /* ---- top right: clock + weather ---- */
+  .info { position: absolute; left: 0; right: 0; top: 4vh; display: flex; flex-direction: column; align-items: center; text-align: center; text-shadow: 0 .2vw 2vw rgba(0,0,0,.18); }
+  .time { font-size: 10.5vw; font-weight: 600; line-height: .95; letter-spacing: -.02em; color: rgba(255,255,255,.88);
+    background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.7)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: none;
+    filter: drop-shadow(0 .3vw 2vw rgba(0,0,0,.2)); }
+  .time small { display: none; }
+  .date { order: -1; margin: 0 0 .6vh; font-size: 2.3vw; font-weight: 600; color: rgba(255,255,255,.9); }
+
+  /* ---- shelf ---- */
+  .shelf { position: absolute; left: 50%; transform: translateX(-50%); bottom: 10vh; padding: 1.3vw 1.5vw; border-radius: 2vw;
+    display: flex; gap: 1.5vw; align-items: center;
+    background: rgba(255,255,255,.14); -webkit-backdrop-filter: blur(30px) saturate(1.5); backdrop-filter: blur(30px) saturate(1.5);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 2vw 5vw rgba(0,0,0,.25); }
+  .item { display: block; width: 8.4vw; height: 8.4vw; border-radius: 1.5vw; position: relative; outline: none;
+    text-decoration: none; color: inherit; overflow: hidden; display: grid; place-items: center;
+    transition: transform .22s cubic-bezier(.2,.8,.2,1), box-shadow .22s ease; }
+  .item:focus, .item.focus { transform: scale(1.14); box-shadow: 0 1.4vw 3vw rgba(0,0,0,.5), 0 0 0 .22vw #fff; z-index: 2; }
+  .item img { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .add { background: rgba(190,140,120,.45); box-shadow: inset 0 0 0 .18vw rgba(255,255,255,.55); }
+  .add span { font-size: 4vw; font-weight: 200; }
+  .credit { position: absolute; right: 2.4vw; bottom: 3vh; font-size: 1vw; opacity: .6; text-shadow: 0 .1vw .4vw rgba(0,0,0,.6); }
+  .hint { position: absolute; left: 6.8vw; bottom: 1.2vh; font-size: 1.3vw; opacity: .8; text-shadow: 0 .1vw .5vw rgba(0,0,0,.4); }
+  .name { display: none; position: absolute; bottom: 5.8vh; left: 43vw; font-size: 1.5vw; font-weight: 500; opacity: 0; transition: opacity .2s; text-shadow: 0 .1vw .5vw rgba(0,0,0,.5); }
+  /* ---- No Signal screen (shows when the TV is offline) ---- */
+  .nosig { position: fixed; inset: 0; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+    background: rgba(8,10,18,.55); -webkit-backdrop-filter: blur(40px) saturate(1.4); backdrop-filter: blur(40px) saturate(1.4); }
+  .nosig.on { display: flex; animation: nsin .4s ease; }
+  @keyframes nsin { from { opacity: 0; } to { opacity: 1; } }
+  .nosig svg { width: 9vw; height: 9vw; margin-bottom: 3vh; opacity: .9; }
+  .nosig h1 { font-size: 5vw; font-weight: 600; letter-spacing: -.01em; }
+  .nosig p { margin-top: 1.4vh; font-size: 1.8vw; opacity: .7; }
+  .nosig .dots span { display: inline-block; width: .7vw; height: .7vw; margin: 3vh .35vw 0; border-radius: 50%; background: #fff; opacity: .3; animation: nsd 1.2s infinite; }
+  .nosig .dots span:nth-child(2) { animation-delay: .2s; } .nosig .dots span:nth-child(3) { animation-delay: .4s; }
+  @keyframes nsd { 50% { opacity: 1; } }
+  /* ---- weather widget ---- */
+  .wx { position: absolute; right: 3.6vw; top: 4vh; width: 26vw; padding: .9vw 1.5vw; border-radius: 2vw; display: none;
+    background: rgba(255,255,255,.16); -webkit-backdrop-filter: blur(34px) saturate(1.7); backdrop-filter: blur(34px) saturate(1.7);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.14), 0 2vw 5vw rgba(0,0,0,.22); text-shadow: 0 .1vw .6vw rgba(0,0,0,.18); }
+  .wx.on { display: block; }
+  .wx .top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .wx .city { font-size: 1.7vw; font-weight: 600; }
+  .wx .cond { font-size: 1.15vw; opacity: .85; margin-top: .3vh; }
+  .wx .temp { font-size: 4vw; font-weight: 200; line-height: 1; letter-spacing: -.02em; }
+  .wx .hl { font-size: 1.05vw; opacity: .8; margin-top: .4vh; text-align: right; }
+  .wx .ic svg { width: 100%; height: 100%; display: block; }
+  .wx .big { width: 3.2vw; height: 3.2vw; margin-left: auto; margin-bottom: .4vh; }
+  .wx hr { border: 0; height: 1px; background: rgba(255,255,255,.22); margin: 1vh 0; }
+  .wx .hours { display: flex; justify-content: space-between; text-align: center; font-size: 1vw; }
+  .wx .hours div { display: flex; flex-direction: column; align-items: center; gap: .5vh; }
+  .wx .hours .ic { width: 2.1vw; height: 2.1vw; } .wx .hours b { font-weight: 500; font-size: 1.15vw; }
+  .wx .hours span { opacity: .8; }
+  .wx .days { display: flex; justify-content: space-between; text-align: center; font-size: 1vw; }
+  .wx .day { display: flex; flex-direction: column; align-items: center; gap: .3vh; flex: 1; }
+  .wx .day .ic { width: 1.9vw; height: 1.9vw; } .wx .day b { font-weight: 500; font-size: 1.1vw; } .wx .day .lo { opacity: .6; }
+  /* ---- HDMI inputs row ---- */
+  .inputs { position: absolute; left: 50%; transform: translateX(-50%); bottom: 4vh; display: flex; gap: 1vw; padding: .8vw 1vw; border-radius: 99px;
+    background: rgba(255,255,255,.14); -webkit-backdrop-filter: blur(30px) saturate(1.5); backdrop-filter: blur(30px) saturate(1.5);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+  .chip { display: flex; align-items: center; gap: .6vw; padding: .9vh 1.5vw; border-radius: 99px; font-size: 1.35vw; font-weight: 500; color: #fff; text-decoration: none; outline: none;
+    background: rgba(255,255,255,.12); transition: transform .2s cubic-bezier(.2,.8,.2,1), background .2s, box-shadow .2s; }
+  .chip svg { width: 1.7vw; height: 1.7vw; }
+  .chip:focus, .chip.focus { transform: scale(1.1); background: rgba(255,255,255,.3); box-shadow: 0 .8vw 2vw rgba(0,0,0,.35), 0 0 0 .18vw #fff; }
+  /* ---- second screen: recommendations ---- */
+  .pager { position: fixed; inset: 0; z-index: 1; transition: transform .75s cubic-bezier(.2,.8,.2,1); }
+  .pager.p2 { transform: translateY(-100%); }
+  .screen2 { position: absolute; left: 0; right: 0; top: 100%; height: 100%; padding: 4.2vh 4.5vw 0; overflow: hidden; }
+  .screen2 h2 { font-size: 1.8vw; font-weight: 600; margin: 0 0 .6vh; text-shadow: 0 .1vw .8vw rgba(0,0,0,.4); }
+  .rowbox { overflow: hidden; padding: .9vw .4vw 1.5vw; margin: 0 -.4vw; }
+  .track { position: relative; display: flex; gap: 1.4vw; transition: transform .4s cubic-bezier(.2,.8,.2,1); will-change: transform; }
+  .card { position: relative; flex: 0 0 9.6vw; width: 9.6vw; min-width: 0; text-decoration: none; color: #fff; outline: none; transition: transform .22s cubic-bezier(.2,.8,.2,1); }
+  .card .poster { width: 9.6vw; height: 14.2vw; border-radius: 1.2vw; overflow: hidden; background: linear-gradient(160deg,#3a3f6b,#1a1c33); position: relative;
+    box-shadow: 0 .8vw 2vw rgba(0,0,0,.35); display: grid; place-items: center; text-align: center; padding: 1vw; font-weight: 600; font-size: 1.3vw; }
+  .card .poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .card b { display: block; margin-top: 1vh; font-size: 1.15vw; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 .1vw .5vw rgba(0,0,0,.5); }
+  .card span.sub { display: none; font-size: .95vw; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 .1vw .5vw rgba(0,0,0,.5); }
+  .card:focus, .card.focus { transform: scale(1.08); z-index: 3; }
+  .card:focus .poster { box-shadow: 0 1.4vw 3vw rgba(0,0,0,.55), 0 0 0 .22vw #fff; }
+  .screen2 .back { position: absolute; left: 6.8vw; bottom: 3vh; font-size: 1.2vw; opacity: .7; }
+  /* Netflix-style Top 10: big outlined number behind the poster */
+  .card.top { flex: 0 0 16.8vw; width: 16.8vw; }
+  .card.top.ten { flex-basis: 22vw; width: 22vw; }
+  .card.top .poster { margin-left: 7vw; }
+  .card.top.ten .poster { margin-left: 12.3vw; }
+  .card.top b, .card.top span.sub { display: none; }
+  .card .num { position: absolute; left: 0; top: 0; height: 14.2vw; display: flex; align-items: flex-end; font-style: normal;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 900; font-size: 14.2vw; line-height: .74; letter-spacing: -.09em;
+    color: rgba(8,8,12,.55); -webkit-text-stroke: .28vw rgba(255,255,255,.9); text-shadow: 0 .4vw 1.6vw rgba(0,0,0,.35); pointer-events: none; }
+  .screen2 h2 { display: flex; align-items: center; gap: .9vw; }
+  .t10 { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 2.3vw; height: 2.6vw; border-radius: .25vw; background: #e50914; line-height: 1; box-shadow: 0 .2vw .8vw rgba(0,0,0,.4); }
+  .t10 small { font-size: .55vw; font-weight: 800; letter-spacing: .06em; } .t10 b { font-size: 1.25vw; font-weight: 900; }
+  .nflx { color: #e50914; font-weight: 900; margin-right: -.3vw; }
+  /* frosted glass over the background on the recommendations screen */
+  .frost { position: fixed; inset: 0; z-index: 0; opacity: 0; pointer-events: none; transition: opacity .75s ease;
+    -webkit-backdrop-filter: blur(46px) saturate(1.35) brightness(.8); backdrop-filter: blur(46px) saturate(1.35) brightness(.8); background: rgba(12,14,24,.28); }
+  .frost.on { opacity: 1; }
+  .card .ch { position: absolute; left: .6vw; top: .6vw; z-index: 2; max-width: 8.2vw; padding: .25vw .7vw; border-radius: 99px; font-style: normal; font-size: .85vw; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background: rgba(20,22,34,.62); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); }
+  .card .rt { position: absolute; right: .6vw; bottom: .6vw; z-index: 2; padding: .2vw .6vw; border-radius: 99px; font-style: normal; font-size: .85vw; font-weight: 700; background: rgba(20,22,34,.62); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); }
+  .card.rec b { text-align: left; margin-top: 1.2vh; }
+  /* frosted panels + calm headings */
+  .panel { margin-bottom: 2.2vh; padding: 1.2vw 1.6vw 0; border-radius: 2.2vw;
+    background: rgba(255,255,255,.09); -webkit-backdrop-filter: blur(28px) saturate(1.5); backdrop-filter: blur(28px) saturate(1.5);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.13), 0 1.6vw 4vw rgba(0,0,0,.22); }
+  .screen2 h2 { display: block; font-size: 1.75vw; font-weight: 600; letter-spacing: -.01em; margin: 0 0 .4vh; }
+  .screen2 h2 span { font-size: 1.15vw; font-weight: 400; opacity: .6; margin-left: .9vw; letter-spacing: 0; }
+  .card .poster { border-radius: 1vw; }
+  /* minimal + clean overrides */
+  .panel { background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; padding: 0; margin-bottom: 3.4vh; border-radius: 0; }
+  .screen2 { padding: 7vh 4.5vw 0; }
+  .screen2 h2 { font-size: 1.5vw; font-weight: 500; margin: 0 0 .8vh; text-shadow: 0 .1vw .8vw rgba(0,0,0,.3); }
+  .screen2 h2 span { font-size: 1.05vw; opacity: .55; }
+  .card .ch, .card .rt { display: none; }
+  .card .poster { box-shadow: 0 .6vw 1.6vw rgba(0,0,0,.28); border-radius: .9vw; }
+  .card b { font-size: 1vw; font-weight: 500; margin-top: 1.1vh; }
+  .card span.sub { display: block; font-size: .85vw; opacity: .55; margin-top: .2vh; }
+  .card.top span.sub, .card.top b { display: none; }
+  /* HDMI inputs on the second screen */
+  .hd { flex: 0 0 13vw; height: 6.4vh; display: flex; align-items: center; justify-content: center; gap: .7vw; border-radius: 1vw; text-decoration: none; color: #fff; outline: none;
+    font-size: 1.15vw; font-weight: 500; background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); transition: transform .2s cubic-bezier(.2,.8,.2,1), background .2s, box-shadow .2s; }
+  .hd svg { width: 1.6vw; height: 1.6vw; }
+  .hd:focus, .hd.focus { transform: scale(1.06); background: rgba(255,255,255,.28); box-shadow: 0 .8vw 2vw rgba(0,0,0,.3), 0 0 0 .2vw #fff; }
+  .screen2 { padding-top: 5vh; } .panel { margin-bottom: 2.2vh; }
+  .card { flex-basis: 8.8vw; width: 8.8vw; } .card .poster { width: 8.8vw; height: 13vw; }
+  .card.top { flex-basis: 15.6vw; width: 15.6vw; } .card.top.ten { flex-basis: 20.4vw; width: 20.4vw; }
+  .card.top .poster { margin-left: 6.4vw; } .card.top.ten .poster { margin-left: 11.4vw; }
+  .card .num { height: 13vw; font-size: 13vw; }
+  .rowbox { padding: .7vw .4vw 1.1vw; }
+  /* trailer preview inside the focused poster */
+  .pv { position: absolute; top: 0; left: 50%; height: 100%; width: 23.2vw; transform: translateX(-50%); border: 0; opacity: 0; transition: opacity .7s ease; pointer-events: none; background: #000; }
+  .pv.on { opacity: 1; }
+  .tmdb { position: absolute; right: 4.5vw; bottom: 3vh; font-size: .75vw; opacity: .45; }
+  /* Netflix-style pop-out preview card */
+  .pop { position: fixed; z-index: 6; background: #181818; color: #fff; border-radius: .8vw; overflow: hidden; opacity: 0; transform: scale(.9); transform-origin: center top;
+    transition: opacity .3s ease, transform .3s cubic-bezier(.2,.8,.2,1); pointer-events: none; box-shadow: 0 1.4vw 4vw rgba(0,0,0,.65); }
+  .pop.on { opacity: 1; transform: scale(1); }
+  .pop .pm { position: relative; width: 100%; padding-top: 56.25%; background: #222; }
+  .pop .pm img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pop .pm::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(transparent, #181818); pointer-events: none; }
+  .pop .pm .pv { left: 0; width: 100%; transform: none; }
+  .pop .pi { padding: .9vw 1.2vw 1.2vw; }
+  .pop .pbtns { display: flex; gap: .6vw; margin-bottom: .9vh; }
+  .pop .pb { width: 2.4vw; height: 2.4vw; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 1.1vw; box-shadow: inset 0 0 0 .13vw rgba(255,255,255,.55); background: rgba(42,42,42,.6); }
+  .pop .pb.play { background: #fff; color: #000; box-shadow: none; padding-left: .12vw; }
+  .pop .pb.ch { margin-left: auto; }
+  .pop .pt { font-size: 1.15vw; font-weight: 700; margin-bottom: .5vh; }
+  .pop .pmeta { display: flex; gap: .8vw; align-items: center; font-size: .9vw; margin-bottom: .8vh; }
+  .pop .pr { color: #46d369; font-weight: 700; } .pop .py { opacity: .75; }
+  .pop .pc { padding: .1vw .5vw; border-radius: .25vw; box-shadow: inset 0 0 0 1px rgba(255,255,255,.4); opacity: .85; }
+  .pop .po { margin: 0; font-size: .9vw; line-height: 1.4; opacity: .8; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  /* the old in-poster trailer slot is no longer used */
+  .card .poster .pv { display: none; }
+  .pop .pv { display: block !important; position: absolute; top: 0; height: 100%; border: 0; opacity: 0; transition: opacity .7s; pointer-events: none; background: #000; }
+  .pop .pv.on { opacity: 1; }
+  /* landscape cards (Continue watching + Recommended) */
+  .card.wide { flex: 0 0 12.4vw; width: 12.4vw; }
+  .card.wide .poster { width: 12.4vw; height: 6.98vw; padding: 0; }
+  .card.wide .poster::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(0,0,0,.72)); pointer-events: none; }
+  .card.wide b { position: absolute; left: .7vw; right: .7vw; bottom: .5vw; margin: 0; z-index: 2; font-size: .92vw; font-weight: 600; text-shadow: 0 .1vw .5vw rgba(0,0,0,.7); }
+  .card.wide span.sub { display: none; }
+  .card.wide .rowfix { display: none; }
+  /* Netflix-style rows: tall posters; the selected one expands inline into a landscape card */
+  .s2in { position: relative; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+  .card { transition: width .38s cubic-bezier(.2,.8,.2,1), flex-basis .38s cubic-bezier(.2,.8,.2,1), transform .2s; }
+  .card .poster { transition: width .38s cubic-bezier(.2,.8,.2,1), margin-left .38s cubic-bezier(.2,.8,.2,1); }
+  .card.exp { flex-basis: 22vw; width: 22vw; }
+  .card.exp .poster { width: 22vw; }
+  .card.top.exp { flex-basis: 28.8vw; width: 28.8vw; }
+  .card.top.ten.exp { flex-basis: 34.4vw; width: 34.4vw; }
+  .card .poster img.bk { opacity: 0; transition: opacity .38s ease; }
+  .card.exp .poster img.bk { opacity: 1; }
+  .card .nl { position: absolute; right: .7vw; top: .6vw; width: 1.15vw; height: 1.7vw; z-index: 3; opacity: 0; transition: opacity .3s; filter: drop-shadow(0 .1vw .3vw rgba(0,0,0,.5)); }
+  .card.exp .nl { opacity: 1; }
+  .card .poster .pv { display: block; position: absolute; inset: 0; left: 0; top: 0; width: 100%; height: 100%; transform: none; z-index: 2; }
+  .card .cap { display: block; height: 5.4vh; margin-top: 1vh; opacity: 0; transition: opacity .3s; }
+  .card.exp .cap { opacity: 1; }
+  .card .cap b, .card.top .cap b { display: block !important; margin: 0; font-size: 1.1vw; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 .1vw .5vw rgba(0,0,0,.5); }
+  .card .cap span, .card.top .cap span { display: block !important; font-size: .9vw; opacity: .7; margin-top: .3vh; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card.top .cap { margin-left: 7vw; } .card.top.ten .cap { margin-left: 12.3vw; }
+  /* no words under the Recommended / Top 10 pictures */
+  /* Netflix Top 10 caption: type · genre · year · seasons · age, then the description */
+  .card.top .cap { height: 9.5vh; width: 31vw; margin-top: 1.2vh; }
+  .card.top .cap .tm { display: flex !important; align-items: center; gap: .6vw; font-size: 1vw !important; font-weight: 600; opacity: .95 !important; margin: 0 !important; }
+  .card.top .cap .age { font-style: normal; font-size: .75vw; font-weight: 700; padding: .15vw .45vw; border-radius: 99px; background: #e0449b; color: #fff; }
+  .card.top .cap p { margin: .6vh 0 0; font-size: 1vw; line-height: 1.35; opacity: .9; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .screen2 h2 span:empty { display: none; }
+  /* expanded Top 10 card slides over its number, like Netflix */
+  .card.top.exp { flex-basis: 25.4vw; width: 25.4vw; }
+  .card.top.ten.exp { flex-basis: 30vw; width: 30vw; }
+  .card.top.exp .poster { margin-left: 3.4vw; }
+  .card.top.ten.exp .poster { margin-left: 8vw; }
+  .card.top.exp .cap { margin-left: 3.4vw; } .card.top.ten.exp .cap { margin-left: 8vw; }
+  .card .cap { transition: opacity .3s, margin-left .38s cubic-bezier(.2,.8,.2,1); }
+  /* app icon looks (chosen on the phone remote): Glass + optional colour overlay */
+  body[data-icons="glass"] .shelf .item { background: rgba(255,255,255,.14) !important; -webkit-backdrop-filter: blur(22px) saturate(1.8); backdrop-filter: blur(22px) saturate(1.8);
+    box-shadow: inset 0 .1vw .25vw rgba(255,255,255,.75), inset 0 -.15vw .35vw rgba(255,255,255,.28), inset 0 0 0 .08vw rgba(255,255,255,.3), 0 .9vw 2.2vw rgba(0,0,0,.28); }
+  body[data-icons="glass"] .shelf .item:focus, body[data-icons="glass"] .shelf .item.focus { box-shadow: inset 0 .1vw .25vw rgba(255,255,255,.75), 0 1.4vw 3vw rgba(0,0,0,.5), 0 0 0 .22vw #fff; }
+  body[data-icons="glass"] .shelf .item img { opacity: .72; filter: saturate(1.25) brightness(1.12) contrast(1.05); }
+  body[data-icons="glass"] .shelf .item::before { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+    background: linear-gradient(135deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 62%, rgba(255,255,255,.22) 100%); }
+  body[data-tint="on"] .shelf .item::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: var(--tint); mix-blend-mode: color; opacity: .92; }
+  body[data-tint="on"] .shelf .item img { filter: grayscale(.35) contrast(1.05); }
+  body[data-tint="on"][data-icons="glass"] .shelf .item img { filter: grayscale(.35) saturate(1.25) brightness(1.12) contrast(1.05); }
+  /* bigger cards, rows closer together */
+  .card { flex-basis: 11vw; width: 11vw; }
+  .card .poster { width: 11vw; height: 16.2vw; }
+  .card.exp { flex-basis: 27.5vw; width: 27.5vw; } .card.exp .poster { width: 27.5vw; }
+  .card.top { flex-basis: 19.5vw; width: 19.5vw; } .card.top.ten { flex-basis: 25.5vw; width: 25.5vw; }
+  .card.top .poster { margin-left: 8.5vw; } .card.top.ten .poster { margin-left: 14.5vw; }
+  .card.top.exp { flex-basis: 31.7vw; width: 31.7vw; } .card.top.ten.exp { flex-basis: 37.3vw; width: 37.3vw; }
+  .card.top.exp .poster { margin-left: 4.2vw; } .card.top.ten.exp .poster { margin-left: 9.8vw; }
+  .card.top .cap { margin-left: 8.5vw; width: 36vw; height: 8vh; } .card.top.ten .cap { margin-left: 14.5vw; }
+  .card.top.exp .cap { margin-left: 4.2vw; } .card.top.ten.exp .cap { margin-left: 9.8vw; }
+  .card .num { height: 16.2vw; font-size: 16.2vw; }
+  .card .cap { height: 4.6vh; margin-top: .8vh; }
+  .panel { margin-bottom: .5vh; }
+  .rowbox { padding: .6vw .4vw .7vw; }
+  .screen2 { padding-top: 4vh; }
+  .screen2 h2 { margin: 0 0 .1vh; }
+  /* zoom the trailer slightly so YouTube's title bar and buttons fall outside the card */
+  .card .poster .pv { transform: scale(1.5); transform-origin: center center; }
+  /* cards closer together */
+  .track { gap: .45vw; }
+  .card.top { margin-right: -.6vw; }
+  /* the + drawn from two bars so it sits exactly in the middle of the tile */
+  .add .pl { display: block; width: 3.2vw; height: 3.2vw; opacity: .92;
+    background: linear-gradient(#fff, #fff) center / 100% .2vw no-repeat, linear-gradient(#fff, #fff) center / .2vw 100% no-repeat; }
+  /* frosted + tile */
+  .shelf .item.add { background: rgba(255,255,255,.16); -webkit-backdrop-filter: blur(26px) saturate(1.7); backdrop-filter: blur(26px) saturate(1.7);
+    box-shadow: inset 0 .1vw .25vw rgba(255,255,255,.6), inset 0 0 0 .08vw rgba(255,255,255,.3), 0 .8vw 2vw rgba(0,0,0,.22); }
+  .shelf .item.add:focus, .shelf .item.add.focus { box-shadow: inset 0 .1vw .25vw rgba(255,255,255,.6), 0 1.4vw 3vw rgba(0,0,0,.45), 0 0 0 .22vw #fff; }
+  /* ten tiles on the shelf */
+  .item { width: 7.3vw; height: 7.3vw; border-radius: 1.3vw; }
+  .add .pl { width: 2.8vw; height: 2.8vw; }
+  /* screensaver: everything fades out, the clock moves to the middle of a full-screen photo */
+  .pill, .wx, .shelf, .hint { transition: opacity 1.2s ease; }
+  .info { transition: top 1.4s cubic-bezier(.2,.8,.2,1), transform 1.4s cubic-bezier(.2,.8,.2,1); }
+  .info .time { transition: font-size 1.4s cubic-bezier(.2,.8,.2,1); }
+  body.saver .pill, body.saver .wx, body.saver .shelf, body.saver .hint { opacity: 0 !important; pointer-events: none; }
+  body.saver .info { top: 50%; transform: translateY(-50%); }
+  body.saver .info .time { font-size: 17vw; }
+  body.saver { cursor: none; }
+  /* Liquid Glass clock: tall, slightly stretched numerals with a translucent glass fill */
+  .info .time { font-family: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+    font-weight: 700; letter-spacing: -.015em; line-height: .9;
+    transform: scaleY(1.3); transform-origin: center top; margin-bottom: .3em;
+    background: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.62) 48%, rgba(255,255,255,.34) 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+    -webkit-text-stroke: .09vw rgba(255,255,255,.55);
+    filter: drop-shadow(0 .25vw 1.6vw rgba(20,30,70,.28)) drop-shadow(0 -.05vw .1vw rgba(255,255,255,.35)); }
+  /* clock look controlled from the phone (font, stretch, tint, glass) */
+  .info .time { position: relative; transform: scale(var(--clk-sx, 1), var(--clk-scale, 1.3)); margin-bottom: calc((var(--clk-scale, 1.3) - 1) * .95em);
+    background: linear-gradient(180deg, var(--c1, rgba(255,255,255,.95)) 0%, var(--c2, rgba(255,255,255,.62)) 48%, var(--c3, rgba(255,255,255,.34)) 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: .09vw var(--cs, rgba(255,255,255,.55)); }
+  /* glossy highlight laid over the digits, like the bevel on Apple's glass clock */
+  .info .time::after { content: attr(data-t); position: absolute; left: 0; right: 0; top: 0; text-align: center; -webkit-text-stroke: 0; pointer-events: none;
+    background: linear-gradient(165deg, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 34%, rgba(255,255,255,0) 66%, rgba(255,255,255,.35) 100%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  body[data-clk-style="solid"] .info .time::after { opacity: .5; }
+  body[data-clk-font="classic"] .info .time { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; font-weight: 800; }
+  body[data-clk-font="serif"] .info .time { font-family: "New York", "Iowan Old Style", Georgia, "Times New Roman", serif; font-weight: 800; letter-spacing: -.01em; }
+  body[data-clk-font="condensed"] .info .time { font-family: "Arial Narrow", "Avenir Next Condensed", "Helvetica Neue Condensed", Impact, sans-serif; font-weight: 800; letter-spacing: 0; }
+  /* Condensed = Bebas Neue (SIL Open Font Licence): tall, narrow numerals like iOS's tall clock */
+  @font-face { font-family: "Barlow Condensed"; src: url("assets/fonts/BarlowCondensed-Bold.ttf") format("truetype"); font-weight: 700; font-style: normal; }
+  @font-face { font-family: "Nunito"; src: url("assets/fonts/Nunito.ttf") format("truetype"); font-weight: 200 1000; font-style: normal; }
+  @font-face { font-family: "Oswald"; src: url("assets/fonts/Oswald.ttf") format("truetype"); font-weight: 200 700; font-style: normal; }
+  body[data-clk-font="condensed"] .info .time { font-family: "Bebas Neue", "Arial Narrow", Impact, sans-serif; font-weight: 400; font-size: 15vw; line-height: .82; letter-spacing: .01em;
+    -webkit-text-stroke: .16vw var(--cs, rgba(255,255,255,.6)); }
+  body[data-clk-font="condensed"].saver .info .time { font-size: 21vw; }
+  /* a touch more body in the glass fill */
+  body[data-clk-style="glass"] .info .time { filter: drop-shadow(0 .35vw 1.8vw rgba(15,25,60,.32)) drop-shadow(0 -.06vw .12vw rgba(255,255,255,.45)); }
+  /* real glass: mostly see-through, bright crisp rim, specular shine, soft depth shadow */
+  body[data-clk-style="glass"] .info .time {
+    filter: drop-shadow(0 .45vw 1.6vw rgba(8,16,40,.30)) drop-shadow(0 .08vw .12vw rgba(255,255,255,.55)) drop-shadow(0 -.08vw .1vw rgba(255,255,255,.5)); }
+  body[data-clk-style="glass"] .info .time::after {
+    background-image: linear-gradient(172deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.25) 22%, rgba(255,255,255,0) 40%, rgba(255,255,255,0) 70%, rgba(255,255,255,.55) 100%);
+    mix-blend-mode: normal; opacity: .8; }
+  /* ===== Liquid-Glass clock (drawn by clock.js) ===== */
+  .info .time { transform: none !important; margin-bottom: .2vh !important; filter: none !important; background: none !important;
+    -webkit-text-stroke: 0 !important; -webkit-text-fill-color: transparent !important; position: relative; line-height: 0; }
+  .info .time::before, .info .time::after { content: none !important; display: none !important; }
+  .clk-glass { position: absolute; left: 0; top: 0; width: 100%; height: 100%; clip-path: url(#clkClip); -webkit-clip-path: url(#clkClip);
+    background: var(--clk-tint, rgba(168,225,255,.42));
+    -webkit-backdrop-filter: blur(var(--clk-blur, 24px)) saturate(1.9) brightness(1.32); backdrop-filter: blur(var(--clk-blur, 24px)) saturate(1.9) brightness(1.32); }
+  .time.solid .clk-glass { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .clk-fx { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+  .date { font-weight: 600; letter-spacing: .01em; }
+  /* ===== Recommendations: Netflix-accurate Top 10, outline on the card edge, no shadows ===== */
+  .card, .card:focus, .card.focus { transform: none !important; }
+  .card .poster, .card:focus .poster, .card.focus .poster { box-shadow: none !important; }
+  .card .poster { background: rgba(255,255,255,.12); }
+  .card.wide .poster::after { display: none; }
+  .card .cap b, .card .cap span { text-shadow: none !important; }
+  .card .nl { filter: none; }
+  /* white outline drawn on the card's own edge, above the picture/trailer */
+  .card .poster::before { content: ""; position: absolute; inset: 0; z-index: 5; border-radius: inherit; pointer-events: none;
+    box-shadow: inset 0 0 0 .22vw rgba(255,255,255,0); transition: box-shadow .25s ease; }
+  .card.exp .poster::before { box-shadow: inset 0 0 0 .22vw rgba(255,255,255,.96); }
+  /* Top 10 numbers like Netflix: thin light outline only, about 42% of the poster's height, level with its top,
+     sitting right up against the poster. Size and spacing are measured for each number by layoutNumbers(). */
+  .card .num { display: none !important; }
+  .card.top { --m: 6vw; margin-right: 0 !important; }
+  .card.top, .card.top.ten { flex-basis: calc(var(--m) + 11vw) !important; width: calc(var(--m) + 11vw) !important; }
+  .card.top.exp, .card.top.ten.exp { flex-basis: calc(var(--m) + 31.4vw) !important; width: calc(var(--m) + 31.4vw) !important; }
+  .card.top .poster, .card.top.ten .poster, .card.top.exp .poster, .card.top.ten.exp .poster { margin-left: var(--m) !important; }
+  .card.top .cap, .card.top.ten .cap, .card.top.exp .cap, .card.top.ten.exp .cap { margin-left: var(--m) !important; }
+  .numsvg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+  .numsvg text { fill: none; stroke: rgba(210,210,210,.92); stroke-linejoin: miter; font-family: "Oswald", "Arial Narrow", sans-serif; font-weight: 600; }
+  /* the selected card is 16:9 and about 9% taller than the posters, growing upwards like Netflix's */
+  .card.exp { flex-basis: 31.4vw; width: 31.4vw; }
+  .card.exp .poster { width: 31.4vw !important; height: 17.66vw !important; margin-top: -1.46vw; }
+  .rowbox { padding-top: 2.1vw !important; }
+  /* room for 11 tiles when the Switch is connected */
+  .shelf { gap: 1.2vw; }
+  .item { width: 6.4vw; height: 6.4vw; }
+  /* ===== third page: Inputs ===== */
+  .pager.p3 { transform: translateY(-200%); }
+  .screen3 { position: absolute; left: 0; right: 0; top: 200%; height: 100%; padding: 9vh 4.5vw 0; }
+  .screen3 h2 { font-size: 1.5vw; font-weight: 500; margin: 0 0 1.4vh; text-shadow: 0 .1vw .8vw rgba(0,0,0,.3); }
+  .screen3 .back { position: absolute; left: 6.8vw; bottom: 3vh; font-size: 1.2vw; opacity: .7; }
+  #hdRow { gap: 1.4vw; }
+  .hd.big { flex: 0 0 25vw; height: 17vh; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: .5vh; padding: 1.5vw 1.7vw; border-radius: 1.6vw; position: relative; background: rgba(255,255,255,.12); }
+  .hd.big .hdi { position: absolute; left: 1.7vw; top: 1.5vw; } .hd.big .hdi svg { width: 2.6vw; height: 2.6vw; }
+  .hd.big .hdn { font-size: 1.6vw; font-weight: 600; }
+  .hd.big .hdl { font-size: 1.05vw; opacity: .72; }
+  .hd.big .dot { position: absolute; right: 1.5vw; top: 1.5vw; width: .8vw; height: .8vw; border-radius: 50%; background: rgba(255,255,255,.28); }
+  .hd.big.live .dot { background: #30d158; box-shadow: 0 0 .8vw #30d158; }
+  /* ===== Continue watching cards: progress bar, app logo, new-episode badge ===== */
+  .card .prog { position: absolute; left: 0; right: 0; bottom: 0; height: .36vw; background: rgba(255,255,255,.3); z-index: 4; }
+  .card .prog b { display: block; height: 100%; background: #e50914; }
+  .card.exp .prog { left: .22vw; right: .22vw; bottom: .22vw; }   /* inside the white outline */
+  .card .poster img.svc { inset: auto; right: .55vw; top: .55vw; left: auto; bottom: auto; width: 2vw; height: 2vw; border-radius: .45vw; z-index: 4; object-fit: cover; opacity: 1 !important; }
+  .card .newb { position: absolute; left: .55vw; top: .55vw; z-index: 4; font-style: normal; font-size: .8vw; font-weight: 700; padding: .25vw .6vw; border-radius: .35vw; background: #e50914; color: #fff; }
+  .card.cont .nl { opacity: 1; }
+  .cwkeys { font-size: .95vw !important; opacity: .7 !important; margin-left: 1.4vw !important; }
+  .cwkeys i { display: inline-block; width: .7vw; height: .7vw; border-radius: 50%; margin: 0 .4vw 0 .9vw; vertical-align: middle; }
+  /* ===== the selected show's picture fills the background, dimmed (Apple TV / Netflix style) ===== */
+  .hero { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .hero div { position: absolute; inset: 0; background: center / cover no-repeat; opacity: 0; transition: opacity .8s ease; }
+  .hero div.on { opacity: .62; }
+  .hero::after { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .8s ease;
+    background: linear-gradient(90deg, rgba(8,10,18,.78) 0%, rgba(8,10,18,.3) 55%, rgba(8,10,18,.55) 100%), linear-gradient(0deg, rgba(8,10,18,.72), rgba(8,10,18,0) 60%); }
+  body.herook .hero::after { opacity: 1; }
+  /* ===== Switch tile when it's off, and small messages on the TV ===== */
+  .item.off { opacity: .38; filter: grayscale(.7); }
+  .tvtoast { position: fixed; left: 50%; bottom: 7vh; z-index: 60; transform: translate(-50%, 2vh); padding: 1.1vh 1.8vw; border-radius: 99px; font-size: 1.25vw; font-weight: 500;
+    background: rgba(20,22,34,.82); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); opacity: 0; transition: opacity .3s, transform .3s; pointer-events: none; }
+  .tvtoast.on { opacity: 1; transform: translate(-50%, 0); }
+  /* ===== "For you" rows: match %, genres, and why it was picked ===== */
+  .card.rec:not(.cont):not(.pick) .cap { display: none !important; }
+  .card.pick .cap { height: 8vh; width: 36vw; margin-top: 1.2vh; }
+  .card.pick .cap .tm { display: flex !important; align-items: center; gap: .6vw; font-size: 1vw !important; font-weight: 600; opacity: .95 !important; margin: 0 !important; }
+  .card.pick .cap .mt { font-style: normal; color: #46d369; font-weight: 700; }
+  .card.pick .cap p { margin: .5vh 0 0; font-size: 1vw; opacity: .85; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .whyb { position: absolute; left: .55vw; bottom: .8vw; z-index: 4; font-style: normal; font-size: .85vw; font-weight: 600; padding: .25vw .7vw; border-radius: 99px;
+    background: rgba(20,22,34,.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); opacity: 0; transition: opacity .3s; }
+  .card.exp .whyb { opacity: 1; }
+  /* clear Liquid Glass: the clock draws the wallpaper itself (magnified, no blur) */
+  .time.lensed .clk-glass { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+  /* ===== smooth move between the pages (home → shows → inputs) =====
+     One gentle curve and one length for everything: the page glides, the frosted glass and the show's picture fade in
+     with it, the clock, weather and apps melt away as they leave, and the rows fade up as they arrive.
+     The selected card only opens once the page has arrived (see go()), so nothing changes size mid-glide. */
+  :root { --pg: .9s; --pg-ease: cubic-bezier(.33,.1,.12,1); }
+  .pager { transition: transform var(--pg) var(--pg-ease); will-change: transform; }
+  .frost { transition: opacity var(--pg) cubic-bezier(.4,0,.2,1); }
+  .hero div, .hero::after { transition: opacity var(--pg) ease; }
+  .info { transition: top 1.4s cubic-bezier(.2,.8,.2,1), transform 1.4s cubic-bezier(.2,.8,.2,1), opacity 1s ease; }
+  .pager.p2 .screen > .pill, .pager.p2 .screen > .wx, .pager.p2 .screen > .shelf,
+  .pager.p3 .screen > .pill, .pager.p3 .screen > .wx, .pager.p3 .screen > .shelf { opacity: 0; transition: opacity .45s ease; }
+  .pager.p2 .screen > .info, .pager.p3 .screen > .info { opacity: 0; transition: top 1.4s cubic-bezier(.2,.8,.2,1), transform 1.4s cubic-bezier(.2,.8,.2,1), opacity .45s ease; }
+  .screen2, .screen3 { opacity: 0; transition: opacity .45s ease; }
+  .pager.p2 .screen2, .pager.p3 .screen3 { opacity: 1; transition: opacity .75s ease .12s; }
+</style>
+</head>
+<body>
+<div class="wall"></div>
+<div class="bgimg" id="bgA"></div><div class="bgimg" id="bgB"></div>
+<video id="bgv" muted loop playsinline preload="auto"></video>
+<div class="frost" id="frost"></div>
+<div class="hero" id="hero"><div></div><div></div></div>
+<div class="pager" id="pager">
+<div class="screen">
+
+  <div class="pill" id="hello">Good morning, Sophia</div>
+
+  <div class="info">
+    <div class="time" id="time">--:--</div>
+    <div class="date" id="date"></div>
+    
+  </div>
+
+  <aside class="wx" id="wx"></aside>
+
+  <nav class="shelf" id="shelf">
+    <a class="item" href="#" data-name="Netflix" data-app="netflix" data-url="https://www.netflix.com"><img src="assets/netflix.jpg?v=2" alt="Netflix"></a>
+    <a class="item" href="#" data-name="Disney+" data-app="com.disney.disneyplus-prod" data-url="https://www.disneyplus.com"><img src="assets/disney.jpg" alt="Disney+"></a>
+    <a class="item" href="#" data-name="Prime Video" data-app="amazon" data-url="https://www.primevideo.com"><img src="assets/prime.jpg" alt="Prime Video"></a>
+    <a class="item" href="#" data-name="YouTube" data-app="youtube.leanback.v4" data-url="https://www.youtube.com/tv"><img src="assets/youtube.jpg" alt="YouTube"></a>
+    <a class="item" href="#" data-name="ITVX" data-find="itv" data-url="https://www.itv.com/watch"><img src="assets/itvx.jpg" alt="ITVX" style="transform:scale(1.22)"></a>
+    <a class="item" href="#" data-name="BBC iPlayer" data-find="iplayer|bbc" data-url="https://www.bbc.co.uk/iplayer"><img src="assets/iplayer.jpg?v=2" alt="BBC iPlayer"></a>
+    <a class="item" href="#" data-name="Amazon Fire Stick" data-app="com.webos.app.hdmi1"><img src="assets/firestick.jpg" alt="Amazon Fire Stick"></a>
+    <a class="item off" href="#" id="psTile" data-name="PlayStation"><img src="assets/playstation.jpg" alt="PlayStation" style="transform:scale(1.16)"></a>
+    <a class="item off" href="#" id="swTile" data-name="Nintendo Switch"><img src="assets/switch.jpg" alt="Nintendo Switch" style="transform:scale(1.16)"></a>
+    <a class="item" href="#" data-name="Content Store" data-app="com.webos.app.discovery" style="background:linear-gradient(180deg,#46a8ff,#0b57d6)"><svg viewBox="0 0 24 24" style="width:54%;height:auto" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 8.5h13l1 11.5h-15z"/><path d="M9 8.5V7.2a3 3 0 016 0v1.3"/><path d="M9.5 13a2.5 2.5 0 005 0"/></svg></a>
+    <a class="item" href="#" data-name="TV Settings" data-app="com.palm.app.settings" style="background:#76777c"><img src="assets/settings.png" alt="TV Settings" style="transform:scale(1.22)"></a>
+      <a class="item add" href="#" data-name="Add a shortcut"><i class="pl"></i></a>
+  </nav>
+
+
+  <div class="name" id="name"></div>
+  <div class="credit" id="credit"></div>
+</div>
+
+<section class="screen2" id="screen2">
+<div class="s2in" id="s2in">
+  <div class="panel" id="contPanel" style="display:none">
+    <h2>Continue watching<span class="cwkeys"><i style="background:#30d158"></i>Watched <i style="background:#ff453a"></i>Remove</span></h2>
+    <div class="rowbox"><div class="track" id="contRow"></div></div>
+  </div>
+  <div class="panel" id="pickPanel" style="display:none">
+    <h2>Top picks for you<span id="pickWhy"></span></h2>
+    <div class="rowbox"><div class="track" id="pickRow"></div></div>
+  </div>
+  <div class="panel" id="becPanel" style="display:none">
+    <h2 id="becTitle">Because you watched</h2>
+    <div class="rowbox"><div class="track" id="becRow"></div></div>
+  </div>
+  <div class="panel">
+    <h2>Recommended <span>this week · UK</span></h2>
+    <div class="rowbox"><div class="track" id="recRow"></div></div>
+  </div>
+  <div class="panel">
+    <h2>Top 10 Series in the UK Today<span id="topTitle"></span></h2>
+    <div class="rowbox"><div class="track" id="topRow"></div></div>
+  </div>
+</div>
+  <div class="back">▲ Back</div>
+  <div class="tmdb">Trailers via TMDB · This product uses the TMDB API but is not endorsed or certified by TMDB.</div>
+</section>
+<section class="screen3" id="screen3">
+  <div class="panel">
+    <h2>Inputs</h2>
+    <div class="rowbox"><div class="track" id="hdRow"><a class="hd big" href="#" data-name="HDMI 1" data-port="HDMI_1" data-app="com.webos.app.hdmi1"><span class="hdi"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"><path d="M3 8h18v5l-2 3H5l-2-3z"/><path d="M8 11v2M12 11v2M16 11v2"/></svg></span><i class="dot"></i><span class="hdn">HDMI 1</span><span class="hdl">Not connected</span></a><a class="hd big" href="#" data-name="HDMI 2" data-port="HDMI_2" data-app="com.webos.app.hdmi2"><span class="hdi"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"><path d="M3 8h18v5l-2 3H5l-2-3z"/><path d="M8 11v2M12 11v2M16 11v2"/></svg></span><i class="dot"></i><span class="hdn">HDMI 2</span><span class="hdl">Not connected</span></a><a class="hd big" href="#" data-name="HDMI 3" data-port="HDMI_3" data-app="com.webos.app.hdmi3"><span class="hdi"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"><path d="M3 8h18v5l-2 3H5l-2-3z"/><path d="M8 11v2M12 11v2M16 11v2"/></svg></span><i class="dot"></i><span class="hdn">HDMI 3</span><span class="hdl">Not connected</span></a></div></div>
+  </div>
+  <div class="back">▲ Back</div>
+</section>
+</div>
+
+<div class="nosig" id="nosig" role="alert">
+  <svg viewBox="0 0 64 64" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 24a34 34 0 0148 0"/><path d="M15 32a24 24 0 0134 0"/><path d="M23 40a13 13 0 0118 0"/><circle cx="32" cy="48" r="2.4" fill="#fff"/><path d="M10 10l44 44"/></svg>
+  <h1>No Signal</h1>
+  <p>Check your Wi-Fi or internet connection</p>
+  <div class="dots"><span></span><span></span><span></span></div>
+</div>
+<script src="clock.js?v=5"></script>
+<script>
+  // ---- background: video wins, else photo slideshow, else the painted scene ----
+  // Put 4K photos (3840x2160 .jpg) in assets/bg/ and list them here, e.g. ['assets/bg/desert.jpg', 'assets/bg/coast.jpg']
+  const BG_IMAGES = [{"f": "assets/bg/bg01.jpg", "c": "2013 Cogden Bridge · Kreuzschnabel · CC BY-SA 3.0"}, {"f": "assets/bg/bg02.jpg", "c": "2013 Rainbow over Washfold · Kreuzschnabel · CC BY-SA 3.0"}, {"f": "assets/bg/bg03.jpg", "c": "2014 Yorkshire Dales country road  · Kreuzschnabel · CC BY-SA 3.0"}, {"f": "assets/bg/bg04.jpg", "c": "AB BDe 4-4 Jakobsbad - Urnäsch · Kabelleger / David Gubler · CC BY-SA 3.0"}, {"f": "assets/bg/bg05.jpg", "c": "Aguarales de Valpalmas · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg06.jpg", "c": "Algar do Carvao · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg07.jpg", "c": "Amanecer en el lago Titicaca · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg08.jpg", "c": "Andiast-Breil-Brigels. 24-09-2025. · Dominicus Johannes Bergsma. · CC BY-SA 4.0"}, {"f": "assets/bg/bg09.jpg", "c": "Anfiteatro · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg10.jpg", "c": "Berchtesgaden 02 · Dmytro Balkhovitin · CC BY-SA 4.0"}];
+  // Or a short muted loop (1080p H.264 .mp4 is safest on this TV): const BG_VIDEO = 'assets/bg/scenic.mp4';
+  const BG_VIDEO = '';
+  (function () {
+    const v = document.getElementById('bgv');
+    if (BG_VIDEO) {
+      v.src = BG_VIDEO; v.style.display = 'block';
+      v.addEventListener('error', () => { v.style.display = 'none'; });
+      v.play && v.play().catch(() => {});
+      return;
+    }
+    const layers = [document.getElementById('bgA'), document.getElementById('bgB')];
+    const credit = document.getElementById('credit');
+    // Auto mode follows the time of day: dawn 6-10, day 10-17, dusk 17-21, night 21-6
+    const TOD = { dawn: 'assets/bg/tahoe-dawn.jpg', day: 'assets/bg/tahoe-day.jpg', dusk: 'assets/bg/tahoe-dusk.jpg', night: 'assets/bg/tahoe-night.jpg' };
+    const todNow = () => { const h = new Date().getHours(); return h >= 6 && h < 10 ? 'dawn' : h < 17 && h >= 10 ? 'day' : h >= 17 && h < 21 ? 'dusk' : 'night'; };
+    let pos = -1, top = 0, shown = '', timer;     // pos -1 = auto (time of day), 0.. = a photo from BG_IMAGES
+    const paint = (file, text) => {
+      if (file === shown) return;
+      shown = file;
+      window.__bgFile = file; window.dispatchEvent(new Event('bgfile'));   // the glass clock lines its lens up with this photo
+      const l = layers[top]; l.style.backgroundImage = 'url(' + file + ')';
+      l.classList.add('on'); layers[1 - top].classList.remove('on'); top = 1 - top;
+      credit.textContent = text;
+    };
+    const render = () => {
+      if (pos < 0) { const t = todNow(); paint(TOD[t], ''); }
+      else paint(BG_IMAGES[pos].f, 'Photo: ' + BG_IMAGES[pos].c);
+    };
+    window.nextBg = (d) => { if (pos < -1) pos = -1; pos = ((pos + 1 + (d || 0) + BG_IMAGES.length + 1) % (BG_IMAGES.length + 1)) - 1; render(); };
+    // chosen from the phone remote: id 'auto' = follow time of day, otherwise show that file
+    window.setBgFromRemote = (sel) => { if (sel.id === 'auto' || !sel.file) { pos = -1; render(); } else { pos = -2; paint(sel.file, /CC BY/.test(sel.credit || '') ? sel.credit : ''); } };
+    render();
+    setInterval(() => { if (pos === -1) render(); }, 60 * 1000);
+  })();
+
+  // ---- No Signal screen: shown while the TV has no internet ----
+  (function () {
+    const el = document.getElementById('nosig');
+    const sync = () => el.classList.toggle('on', navigator.onLine === false);
+    window.addEventListener('offline', sync); window.addEventListener('online', sync); sync();
+  })();
+
+  // ---- background chosen on the phone remote (server runs on the Mac: node server.js) ----
+  // If your Mac's address changes, edit REMOTE_URL below, or open the page once with ?remote=http://MAC_IP:8787
+  const REMOTE_URL = new URLSearchParams(location.search).get('remote') || 'http://192.168.178.116:8787';
+  (function () {
+    let last = 0;
+    const poll = () => {
+      fetch(REMOTE_URL + '/api/bg').then(r => r.json()).then(j => {
+        setIcons(j.icons); setClock(j.clock); setSwitch(j.switch); setConsole('psTile', j.playstation); setInputs(j.inputs);
+        window.__bgSel = j;
+        if (j.v !== last) { const first = last === 0; last = j.v; if (!first || j.id !== 'auto') window.setBgFromRemote && window.setBgFromRemote(j); }
+      }).catch(() => {});
+    };
+    poll(); setInterval(poll, 3000);
+  })();
+
+  // ---- app icon look from the phone remote ----
+  function setIcons(ic) {
+    if (!ic) return;
+    document.body.dataset.icons = ic.style === 'glass' ? 'glass' : 'normal';
+    if (ic.tint) { document.body.dataset.tint = 'on'; document.body.style.setProperty('--tint', ic.tint); }
+    else { delete document.body.dataset.tint; }
+  }
+
+  // ---- clock look from the phone remote ----
+  function hexA(h, a) { const n = parseInt(h.slice(1), 16); return 'rgba(' + (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255) + ',' + a + ')'; }
+  function setClock(c) {
+    if (!c) return;
+    const b = document.body, st = b.style, a = 0.55 - 0.42 * (c.glass / 100);
+    b.dataset.clkFont = c.font; b.dataset.clkStyle = c.style;
+    st.setProperty('--clk-scale', (1 + 2 * (c.stretch / 100)).toFixed(3));
+    st.setProperty('--clk-sx', '1');
+    if (c.style === 'solid') { st.setProperty('--c1', hexA(c.tint, .97)); st.setProperty('--c2', hexA(c.tint, .97)); st.setProperty('--c3', hexA(c.tint, .97)); st.setProperty('--cs', 'rgba(0,0,0,0)'); }
+    else { st.setProperty('--c1', hexA(c.tint, Math.min(1, a + .22))); st.setProperty('--c2', hexA(c.tint, a)); st.setProperty('--c3', hexA(c.tint, a * .6)); st.setProperty('--cs', 'rgba(255,255,255,.88)'); }
+    if (window.GlassClock) GlassClock.setStyle(c);
+  }
+
+  // ---- clock ----
+  const pad = n => String(n).padStart(2, '0');
+  // Islamic (civil) date, as on the iPhone lock screen: e.g. "28 Jmd.I 1448 AH"
+  const HM = ['Muh.', 'Saf.', 'Rab.I', 'Rab.II', 'Jmd.I', 'Jmd.II', 'Raj.', 'Sha.', 'Ram.', 'Shw.', 'Dhu.Q.', 'Dhu.H.'];
+  function hijri(d) {
+    try {
+      const p = new Intl.DateTimeFormat('en-GB-u-ca-islamic-civil', { day: 'numeric', month: 'numeric', year: 'numeric' }).formatToParts(d);
+      const v = (t) => (p.find((x) => x.type === t) || {}).value, m = parseInt(v('month'), 10);
+      return m ? v('day') + ' ' + HM[m - 1] + ' ' + v('year') + ' AH' : '';
+    } catch (e) { return ''; }
+  }
+  document.body.dataset.clkFont = document.body.dataset.clkFont || 'condensed';
+  document.body.dataset.clkStyle = document.body.dataset.clkStyle || 'glass';
+  function tick() {
+    const d = new Date(); let h = d.getHours(); const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12;
+    if (window.GlassClock) GlassClock.setText(h + ':' + pad(d.getMinutes()));
+    const hr = d.getHours();
+    document.getElementById('hello').textContent =
+      (hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening') + ', Sophia';
+    const hj = hijri(d);
+    document.getElementById('date').textContent =
+      d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + (hj ? ' · ' + hj : '');
+  }
+  tick(); setInterval(tick, 10000);
+
+  // ---- weather widget (Open-Meteo, free, no key). City comes from ?city=Name or the TV's time zone ----
+  const CLOUD = (f) => '<path d="M14 36a8 8 0 010-16 10 10 0 0119 2.5A7 7 0 0132 36z" fill="' + f + '"/>';
+  const ICONS = {
+    sun: '<circle cx="24" cy="24" r="9" fill="#ffd23f"/><g stroke="#ffd23f" stroke-width="3" stroke-linecap="round">' +
+      [0,45,90,135,180,225,270,315].map(a => '<line x1="24" y1="7" x2="24" y2="11" transform="rotate(' + a + ' 24 24)"/>').join('') + '</g>',
+    moon: '<path d="M30 9a15 15 0 1010 22A12 12 0 0130 9z" fill="#e9ebf5"/>',
+    cloud: CLOUD('#f2f4f8'),
+    part: '<circle cx="18" cy="17" r="7" fill="#ffd23f"/>' + CLOUD('#f2f4f8'),
+    partnight: '<path d="M22 8a9 9 0 105 14 8 8 0 01-5-14z" fill="#e9ebf5"/>' + CLOUD('#f2f4f8'),
+    rain: CLOUD('#cfd6e4') + '<g stroke="#5ec0ff" stroke-width="3" stroke-linecap="round"><line x1="17" y1="39" x2="15" y2="44"/><line x1="25" y1="39" x2="23" y2="44"/><line x1="33" y1="39" x2="31" y2="44"/></g>',
+    snow: CLOUD('#e4e9f2') + '<g fill="#fff"><circle cx="17" cy="41" r="2"/><circle cx="25" cy="43" r="2"/><circle cx="33" cy="41" r="2"/></g>',
+    storm: CLOUD('#aab2c4') + '<polygon points="26,34 20,43 25,43 22,50 32,39 26,39" fill="#ffd23f"/>'
+  };
+  const kind = (c, day) => c === 0 ? (day ? 'sun' : 'moon') : c <= 2 ? (day ? 'part' : 'partnight') : c <= 48 ? 'cloud' :
+    c <= 67 ? 'rain' : c <= 77 ? 'snow' : c <= 82 ? 'rain' : c <= 86 ? 'snow' : 'storm';
+  const wxLabel = c => c === 0 ? 'Clear' : c <= 2 ? 'Partly cloudy' : c === 3 ? 'Cloudy' : c <= 48 ? 'Fog' : c <= 67 ? 'Rain' : c <= 77 ? 'Snow' : c <= 82 ? 'Showers' : c <= 86 ? 'Snow showers' : 'Thunderstorm';
+  const svg = k => '<span class="ic"><svg viewBox="0 0 48 48">' + ICONS[k] + '</svg></span>';
+
+  async function loadWeather() {
+    try {
+      const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone || '').split('/').pop().replace(/_/g, ' ');
+      const q = new URLSearchParams(location.search).get('city') || tz;
+      if (!q) return;
+      const g = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&name=' + encodeURIComponent(q))).json();
+      if (!g.results) return;
+      const r = g.results[0];
+      const w = await (await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + r.latitude + '&longitude=' + r.longitude +
+        '&current=temperature_2m,weather_code,is_day&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=6')).json();
+      const cur = w.current, d = w.daily;
+      const hrNow = w.hourly.time.findIndex(t => t >= cur.time.slice(0, 13));
+      let hours = '';
+      for (let i = hrNow + 1; i < hrNow + 6 && i < w.hourly.time.length; i++) {
+        const hh = new Date(w.hourly.time[i]).getHours();
+        hours += '<div><span>' + (hh % 12 || 12) + (hh >= 12 ? 'pm' : 'am') + '</span>' + svg(kind(w.hourly.weather_code[i], w.hourly.is_day[i])) + '<b>' + Math.round(w.hourly.temperature_2m[i]) + '°</b></div>';
+      }
+      const lo = Math.min.apply(null, d.temperature_2m_min.slice(0, 6)), hi = Math.max.apply(null, d.temperature_2m_max.slice(0, 6));
+      let days = '';
+      for (let i = 1; i < 6; i++) {
+        days += '<div class="day"><span>' + new Date(d.time[i]).toLocaleDateString('en-GB', { weekday: 'short' }) + '</span>' + svg(kind(d.weather_code[i], 1)) +
+          '<b>' + Math.round(d.temperature_2m_max[i]) + '°</b><span class="lo">' + Math.round(d.temperature_2m_min[i]) + '°</span></div>';
+      }
+      const el = document.getElementById('wx');
+      el.innerHTML = '<div class="top"><div><div class="city">' + r.name + '</div><div class="cond">' + wxLabel(cur.weather_code) + '</div><div class="temp">' + Math.round(cur.temperature_2m) + '°</div></div>' +
+        '<div><div class="big">' + svg(kind(cur.weather_code, cur.is_day)) + '</div><div class="hl">H:' + Math.round(d.temperature_2m_max[0]) + '°  L:' + Math.round(d.temperature_2m_min[0]) + '°</div></div></div>' +
+        '<hr><div class="hours">' + hours + '</div><hr><div class="days">' + days + '</div>';
+      el.classList.add('on');
+    } catch (e) {}
+  }
+  loadWeather(); setInterval(loadWeather, 30 * 60 * 1000);
+
+  // ---- launch the real TV app (webOS); falls back to the website when opened in a normal browser ----
+  const tvToast = document.createElement('div'); tvToast.className = 'tvtoast'; document.body.appendChild(tvToast);
+  let tvToastT = null;
+  function toast(t) { tvToast.textContent = t; tvToast.classList.add('on'); clearTimeout(tvToastT); tvToastT = setTimeout(() => tvToast.classList.remove('on'), 2600); }
+  function launch(el) {
+    if (el.classList.contains('off')) { toast(el.id === 'swTile' ? 'Turn on your Nintendo Switch first' : el.id === 'psTile' ? 'Turn on your PlayStation first' : 'Not available right now'); return; }
+    if (el.dataset.find) {            // app id unknown: look it up among the TV's installed apps
+      if (window.PalmServiceBridge) {
+        const re = new RegExp(el.dataset.find, 'i'), lb = new PalmServiceBridge();
+        lb.onservicecallback = (m) => {
+          try {
+            const lp = (JSON.parse(m).launchPoints || []).find(x => re.test(x.title || ''));
+            if (lp) new PalmServiceBridge().call('luna://com.webos.applicationManager/launch', JSON.stringify({ id: lp.id }));
+          } catch (e) {}
+        };
+        lb.call('luna://com.webos.applicationManager/listLaunchPoints', '{}');
+      } else if (el.dataset.url) window.location.href = el.dataset.url;
+      return;
+    }
+    if (!el.dataset.app) { if (el.dataset.provider) toast('Available on ' + el.dataset.provider); return; }
+    if (window.PalmServiceBridge) {
+      const b = new PalmServiceBridge();
+      b.call('luna://com.webos.applicationManager/launch', JSON.stringify({ id: el.dataset.app }));
+    } else if (el.dataset.url) {
+      window.location.href = el.dataset.url;
+    }
+  }
+
+  // ---- remote navigation: row 0 = apps, row 1 = HDMI inputs ----
+  const hdEls = Array.from(document.querySelectorAll('#hdRow a.hd'));
+  const rows = [Array.from(document.querySelectorAll('#shelf a.item')), hdEls];
+  const label = document.getElementById('name');
+  const pager = document.getElementById('pager');
+  let pvTimer = null, pvEl = null, expEl = null;
+  let row = 0, col = 0, page = 0, openTimer = null, foldTimer = null;
+  const PAGE_MS = 900;   // how long the page glides (keep in step with --pg in the CSS)
+  const go = (r, c) => {
+    row = Math.max(0, Math.min(rows.length - 1, r));
+    col = Math.max(0, Math.min(rows[row].length - 1, c));
+    const el = rows[row][col]; el.focus({ preventScroll: true });
+    label.textContent = el.dataset.name; label.style.opacity = 1;
+    const onInputs = rows[row] === hdEls;
+    const pg = onInputs ? 2 : row >= 1 ? 1 : 0, moved = pg !== page;   // 0 = apps, 1 = shows, 2 = inputs
+    page = pg;
+    pager.classList.toggle('p2', pg === 1);
+    pager.classList.toggle('p3', pg === 2);
+    const prevExp = expEl, isCard = !!(el.classList && el.classList.contains('card'));
+    clearTimeout(openTimer);
+    if (pg === 1) clearTimeout(foldTimer);
+    if (moved) {
+      // changing page: stop any trailer at once, but leave the cards' sizes alone while the page glides
+      clearTimeout(pvTimer); if (pvEl) { pvEl.remove(); pvEl = null; }
+      setHero(isCard ? (el.dataset.backdrop || el.dataset.poster) : '');   // the show's picture fades in with the frost
+      if (pg === 1) openTimer = setTimeout(() => previewFor(el), PAGE_MS * 0.65);   // the card opens as the page settles
+      else foldTimer = setTimeout(hidePop, PAGE_MS);                               // and folds away once it's out of sight
+    } else if (pg === 1) previewFor(el);
+    else if (!isCard) setHero('');
+    document.getElementById('frost').classList.toggle('on', pg >= 1);
+    const tr = el.parentElement;
+    if (tr.classList.contains('track')) {
+      const W = window.innerWidth, dOf = (c) => W * 0.204;
+      const x = tr._x || 0, vis = tr.parentElement.clientWidth, gap = W * 0.005;
+      // layout after the previous card collapses and this one expands
+      const before = (prevExp && prevExp !== el && prevExp.parentElement === tr && prevExp.offsetLeft < el.offsetLeft) ? dOf(prevExp) : 0;
+      const left = el.offsetLeft - before + x;
+      const exp = el.classList.contains('card') ? dOf(el) : 0;
+      const right = left + el.offsetWidth + (el.classList.contains('card') && !prevExp ? exp : (el.offsetWidth < W * 0.2 ? exp : 0));
+      let nx = x;
+      if (right > vis) nx = x - (right - vis) - gap;
+      if (left < 0) nx = x - left;
+      tr._x = Math.min(0, nx);
+      tr.style.transform = 'translateX(' + tr._x + 'px)';
+    }
+    const s2 = document.getElementById('s2in'), panel = el.closest ? el.closest('.panel') : null;
+    if (!onInputs) s2.style.transform = (row >= 1 && panel && s2.contains(panel)) ? 'translateY(' + Math.min(0, -panel.offsetTop + window.innerHeight * 0.04) + 'px)' : '';
+  };
+  document.addEventListener('keydown', e => {
+    if (wakeUp()) { e.preventDefault(); return; }   // first press only wakes the screen
+    const k = e.keyCode;
+    if (k === 37) { go(row, col - 1); e.preventDefault(); }
+    else if (k === 39) { go(row, col + 1); e.preventDefault(); }
+    else if (k === 38) { go(row - 1, col); e.preventDefault(); }
+    else if (k === 40) { go(row + 1, col); e.preventDefault(); }
+    else if ((k === 427 || k === 33) && window.nextBg) { nextBg(-1); e.preventDefault(); }   // CH up / Page Up
+    else if ((k === 428 || k === 34) && window.nextBg) { nextBg(1); e.preventDefault(); }    // CH down / Page Down
+    else if ((k === 403 || k === 404) && rows[row][col] && rows[row][col].classList.contains('cont')) {
+      e.preventDefault();
+      const c = rows[row][col], next = k === 404;
+      fetch(REMOTE_URL + '/api/watch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next ? { op: 'next', key: c.dataset.key } : { op: 'remove', key: c.dataset.key }) })
+        .then((r) => r.json()).then((r) => { toast(r.ok ? (next ? 'Watched · on to the next episode' : 'Removed from Continue watching') : (r.error || 'Something went wrong')); loadShows(true); })
+        .catch(() => toast("Can't reach the remote server on your Mac"));
+    }
+    else if (k === 13) rows[row][col].click();
+  });
+  hdEls.forEach((t, ci) => {
+    t.addEventListener('focus', () => { row = rows.indexOf(hdEls); col = ci; });
+    t.addEventListener('click', (e) => { e.preventDefault(); launch(t); });
+  });
+  Array.from(document.querySelectorAll('#shelf a.item')).forEach((t) => {
+    t.addEventListener('focus', () => { row = 0; col = Math.max(0, rows[0].indexOf(t)); label.textContent = t.dataset.name; label.style.opacity = 1; });
+    t.addEventListener('click', e => { e.preventDefault(); launch(t); });
+  });
+  const shelfItems = () => Array.from(document.querySelectorAll('#shelf a.item')).filter((e) => e.style.display !== 'none');
+  rows[0] = shelfItems();
+  // The Switch tile is always on the shelf: dimmed until the TV reports the Switch as connected (checked by the Mac server)
+  function setConsole(id, c) {
+    const tile = document.getElementById(id); if (!tile) return;
+    const on = !!(c && c.connected && c.appId);
+    if (on) tile.dataset.app = c.appId;
+    tile.classList.toggle('off', !on);
+  }
+  const setSwitch = (c) => setConsole('swTile', c);
+  // Inputs page: each HDMI port shows what's plugged in (its HDMI name) and a green dot when connected
+  function setInputs(list) {
+    if (!Array.isArray(list) || !list.length) return;
+    hdEls.forEach((t) => {
+      const d = list.find((x) => x.id === t.dataset.port); if (!d) return;
+      const generic = !d.label || /^hdmi\s*\d$/i.test(d.label);
+      t.querySelector('.hdl').textContent = d.connected ? (generic ? 'Connected' : d.label) : 'Not connected';
+      t.classList.toggle('live', !!d.connected);
+      if (d.appId) t.dataset.app = d.appId;
+    });
+  }
+  // the selected show's picture behind the rows (cross-fades between shows)
+  let heroTop = 0, heroUrl = '';
+  function setHero(url) {
+    const h = document.getElementById('hero'); if (!h) return;
+    url = url || '';
+    if (url === heroUrl) return;
+    heroUrl = url;
+    const L = h.children;
+    if (!url) { L[0].classList.remove('on'); L[1].classList.remove('on'); document.body.classList.remove('herook'); return; }
+    const nx = L[1 - heroTop]; nx.style.backgroundImage = 'url("' + url.replace(/"/g, '%22') + '")';
+    nx.classList.add('on'); L[heroTop].classList.remove('on'); heroTop = 1 - heroTop; document.body.classList.add('herook');
+  }
+
+  // ---- second screen: recommended shows + Netflix top 10 (data comes from the remote server on your Mac) ----
+  // Selected card expands inline into a landscape card; its trailer plays there after a short pause
+  // If trailers misbehave on your TV, set PREVIEWS to false (or open the page with ?previews=0)
+  const PREVIEWS = new URLSearchParams(location.search).get('previews') !== '0';
+  function hidePop() { clearTimeout(pvTimer); if (pvEl) { pvEl.remove(); pvEl = null; } if (expEl) { expEl.classList.remove('exp'); expEl = null; } }
+  function previewFor(el) {
+    clearTimeout(pvTimer);
+    if (pvEl) { pvEl.remove(); pvEl = null; }
+    if (expEl && expEl !== el) { expEl.classList.remove('exp'); expEl = null; }
+    if (!el.classList || !el.classList.contains('card')) return;
+    el.classList.add('exp'); expEl = el;
+    setHero(el.dataset.backdrop || el.dataset.poster);
+    if (PREVIEWS && el.dataset.trailer) {
+      pvTimer = setTimeout(() => {
+        const poster = el.querySelector('.poster'); if (!poster) return;
+        const f = document.createElement('iframe');
+        f.className = 'pv'; f.setAttribute('allow', 'autoplay; encrypted-media'); f.src = REMOTE_URL + '/embed?v=' + encodeURIComponent(el.dataset.trailer);
+        f.style.opacity = '0'; f.style.transition = 'opacity .7s'; f.tabIndex = -1;
+        const keep = () => { try { window.focus(); el.focus({ preventScroll: true }); } catch (e) {} };   // the video must never steal the remote's keys
+        f.addEventListener('load', keep);   // stays invisible until the player reports it is playing
+        poster.appendChild(f); pvEl = f; keep();
+        const kt = setInterval(() => { if (pvEl !== f) clearInterval(kt); else if (document.activeElement === f) keep(); }, 400);
+      }, 1100);
+    }
+  }
+  window.addEventListener('message', (e) => {
+    if (!pvEl || e.source !== pvEl.contentWindow || !e.data || e.data.yt !== 'playing') return;
+    const f = pvEl; setTimeout(() => { if (pvEl === f) f.style.opacity = '1'; }, 400);
+  });
+  function cardLaunch(c) {
+    if (/netflix/i.test(c)) return { app: 'netflix' };
+    if (/disney/i.test(c)) return { app: 'com.disney.disneyplus-prod' };
+    if (/prime|amazon/i.test(c)) return { app: 'amazon' };
+    if (/^itv|^u&|alibi/i.test(c)) return { find: 'itv' };
+    if (/^bbc/i.test(c)) return { find: 'iplayer|bbc' };
+    return {};
+  }
+  const esc = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+  // keep the description to a short first sentence
+  function short(t) {
+    t = String(t || '').trim(); if (!t) return '';
+    const m = t.match(/^.*?[.!?](\s|$)/); let x = (m ? m[0] : t).trim();
+    if (x.length > 105) x = x.slice(0, 100).replace(/\s+\S*$/, '') + '…';
+    return x;
+  }
+  function makeCard(o) {
+    const a = document.createElement('a');
+    a.className = 'card' + (o.rank ? ' top' + (o.rank >= 10 ? ' ten' : '') : ' rec') + (o.cont ? ' cont' : '') + (o.pick ? ' pick' : ''); a.href = '#'; a.dataset.name = o.title; if (o.trailer) a.dataset.trailer = o.trailer;
+    if (o.app) a.dataset.app = o.app; if (o.find) a.dataset.find = o.find; if (o.key) a.dataset.key = o.key;
+    a.dataset.backdrop = o.backdrop || ''; a.dataset.poster = o.image || '';
+    if (o.provider && !o.app && !o.find) a.dataset.provider = o.provider;
+    const svc = { disney: 'disney', prime: 'prime', youtube: 'youtube', iplayer: 'iplayer', itvx: 'itvx' }[o.service];
+    const meta = o.rank ? ['Series', o.genre, o.year, o.seasons ? o.seasons + (o.seasons > 1 ? ' Seasons' : ' Season') : ''].filter(Boolean).join('  ·  ')
+      : [o.vote ? '★ ' + o.vote : '', o.year, o.channel].filter(Boolean).join(' · ');
+    const nf = o.rank || o.app === 'netflix' || /netflix/i.test(o.channel || '');
+    if (o.rank) a.dataset.rank = o.rank;
+    a.innerHTML = (o.rank ? '<svg class="numsvg" aria-hidden="true"><text>' + o.rank + '</text></svg>' : '') +
+      '<div class="poster">' + (o.image ? '<img class="pp" loading="lazy" src="' + esc(o.image) + '" alt="">' : esc(o.title)) +
+      (o.backdrop ? '<img class="bk" loading="lazy" src="' + esc(o.backdrop) + '" alt="">' : '') +
+      (nf ? '<svg class="nl" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="28" y="4" width="15" height="92" fill="#a30b13"/><rect x="57" y="4" width="15" height="92" fill="#a30b13"/><polygon points="28,4 43,4 72,96 57,96" fill="#e50914"/></svg>' : '') +
+      (svc && !nf ? '<img class="svc" src="assets/' + svc + '.jpg" alt="">' : '') +
+      (o.badge ? '<em class="newb">' + esc(o.badge) + '</em>' : '') +
+      (o.whyTag ? '<em class="whyb">' + esc(o.whyTag) + '</em>' : '') +
+      (o.cont && o.progress > 0 ? '<i class="prog"><b style="width:' + Math.round(o.progress * 100) + '%"></b></i>' : '') + '</div>' +
+      '<div class="cap">' + (o.rank ? '<span class="tm">' + esc(meta) + (o.age ? '<em class="age">' + esc(o.age) + '</em>' : '') + '</span><p>' + esc(short(o.overview)) + '</p>' : o.pick ? '<span class="tm"><em class="mt">' + o.match + '% match</em>' + esc([].concat(o.tags || [], o.year ? [o.year] : []).join('  ·  ')) + '</span><p>' + esc(o.why + (o.provider && !o.app && !o.find ? ' · On ' + o.provider : '')) + '</p>'
+      : o.cont ? '<b>' + esc(o.epLine || o.title) + '</b><span>' + esc(o.left || '') + '</span>' : '<b>' + esc(o.title) + '</b><span>' + esc(meta) + '</span>') + '</div>';
+    return a;
+  }
+  // Netflix-style Top 10 numbers, measured one by one so each sits right up against its poster
+  const numCtx = document.createElement('canvas').getContext('2d');
+  const NUM_FONT = '"Oswald", "Arial Narrow", sans-serif';
+  function layoutNumbers() {
+    const cards = document.querySelectorAll('#topRow .card.top');
+    if (!cards.length) return;
+    const W = window.innerWidth, ph = W * 0.162, trackGap = W * 0.0045;
+    numCtx.font = '600 100px ' + NUM_FONT;
+    const mc = numCtx.measureText('0123456789');
+    const cap = (mc.actualBoundingBoxAscent > 0 ? mc.actualBoundingBoxAscent : 71) / 100;
+    const fs = 0.42 * ph / cap;                         // number is about 42% as tall as the poster
+    const sw = Math.max(1.2, ph * 0.006);               // thin outline
+    const gap = Math.max(0, ph * 0.065 - trackGap);     // space after the previous poster
+    const h = cap * fs;
+    numCtx.font = '600 ' + fs + 'px ' + NUM_FONT;
+    cards.forEach((card) => {
+      const m = numCtx.measureText(card.dataset.rank);
+      const L = m.actualBoundingBoxLeft || 0, R = m.actualBoundingBoxRight || m.width, ink = L + R;
+      card.style.setProperty('--m', (gap + ink * 0.95).toFixed(1) + 'px');   // poster just touches the number's right edge
+      const svg = card.querySelector('.numsvg'), t = svg && svg.firstChild; if (!t) return;
+      svg.setAttribute('width', (ink + sw * 2).toFixed(1)); svg.setAttribute('height', (h + sw * 2).toFixed(1));
+      svg.style.left = (gap - sw).toFixed(1) + 'px'; svg.style.top = (-sw).toFixed(1) + 'px';
+      t.setAttribute('x', (L + sw).toFixed(2)); t.setAttribute('y', (h + sw).toFixed(2));
+      t.setAttribute('font-size', fs.toFixed(2)); t.setAttribute('stroke-width', sw.toFixed(2));
+    });
+  }
+  window.addEventListener('resize', layoutNumbers);
+  if (document.fonts && document.fonts.load) document.fonts.load('600 100px ' + NUM_FONT).then(layoutNumbers).catch(() => {});
+  function fill(rowEl, cards) { rowEl.innerHTML = ''; cards.forEach((c) => rowEl.appendChild(c)); return cards; }
+  function wire(list, ri) {
+    list.forEach((t, ci) => {
+      t.addEventListener('focus', () => { row = ri; col = ci; });
+      t.addEventListener('click', (e) => { e.preventDefault(); launch(t); });
+    });
+  }
+  let lastSig = '';
+  async function loadShows(force) {
+    try {
+      const d = await (await fetch(REMOTE_URL + '/api/shows')).json();
+      const sig = JSON.stringify(d);
+      if (!force && sig === lastSig) return;          // nothing changed
+      if (!force && row >= 1 && rows.length > 2) return;                  // don't rebuild while you're browsing; try again next time
+      lastSig = sig;
+      const meta = (s) => ({ trailer: s.trailer, backdrop: s.backdrop, overview: s.overview, year: s.year, vote: s.vote, genre: s.genre, seasons: s.seasons, age: s.age });
+      const svcLaunch = { netflix: { app: 'netflix' }, disney: { app: 'com.disney.disneyplus-prod' }, prime: { app: 'amazon' }, youtube: { app: 'youtube.leanback.v4' }, iplayer: { find: 'iplayer|bbc' }, itvx: { find: 'itv' } };
+      const left = (s) => {
+        if (!s.runtime) return '';
+        const m = Math.max(1, Math.round(s.runtime * (1 - (s.progress || 0)))), t = m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + 'm';
+        return s.progress > 0 ? t + ' left' : t;
+      };
+      const cont = fill(document.getElementById('contRow'), (d.watching || []).map((s) =>
+        makeCard(Object.assign({ title: s.title, image: s.image || s.backdrop, cont: true, key: s.key, service: s.service, progress: s.progress, badge: s.badge,
+          epLine: 'S' + s.season + ' E' + s.episode + (s.epName ? ' · ' + s.epName : ''), left: left(s) }, meta(s), { backdrop: s.still || s.backdrop }, svcLaunch[s.service] || {}))));
+      document.getElementById('contPanel').style.display = cont.length ? '' : 'none';
+      const fy = d.forYou || {};
+      const pickCard = (p) => makeCard(Object.assign({ title: p.name, image: p.poster, backdrop: p.backdrop, trailer: p.trailer, overview: p.overview, year: p.year,
+        pick: true, match: p.match, tags: p.tags, why: p.why, service: p.service, provider: p.provider }, svcLaunch[p.service] || {}));
+      const picks = fill(document.getElementById('pickRow'), (fy.picks || []).map(pickCard));
+      document.getElementById('pickPanel').style.display = picks.length ? '' : 'none';
+      document.getElementById('pickWhy').textContent = fy.insight || '';
+      const bec = fill(document.getElementById('becRow'), ((fy.because && fy.because.items) || []).map(pickCard));
+      document.getElementById('becPanel').style.display = bec.length ? '' : 'none';
+      if (fy.because) document.getElementById('becTitle').textContent = 'Because you watched ' + fy.because.title;
+      const rec = fill(document.getElementById('recRow'), (d.recommended || []).map((s) =>
+        makeCard(Object.assign({ title: s.name, image: s.image || s.backdrop, channel: s.channel, whyTag: s.why }, meta(s), cardLaunch(s.channel || '')))));
+      const top = fill(document.getElementById('topRow'), (d.top10 || []).map((s) =>
+        makeCard(Object.assign({ title: s.title, image: s.image, rank: s.rank, channel: 'Netflix', app: 'netflix' }, meta(s)))));
+      if (d.week) document.getElementById('topTitle').textContent = '';
+      layoutNumbers();
+      rows.length = 1;
+      [cont, picks, bec, rec, top].forEach((list) => { if (list.length) { rows.push(list); wire(list, rows.length - 1); } });
+      rows.push(hdEls);
+      if (force && row >= 1) { const r = Math.min(row, rows.length - 1); go(r, Math.min(col, rows[r].length - 1)); }
+      else if (row >= 1) row = rows.length - 1;   // you were on the inputs row while the shows were still loading
+    } catch (e) {}
+  }
+  loadShows(); setInterval(loadShows, 60 * 1000);
+
+
+  // ---- photo screensaver: after a few minutes idle, only the clock over a full-screen photo ----
+  const SAVER_MIN = parseFloat(new URLSearchParams(location.search).get('saver')) || 5;
+  let idleT = null, saverCycle = null;
+  const saving = () => document.body.classList.contains('saver');
+  function restoreBg() { const sel = window.__bgSel; window.setBgFromRemote && window.setBgFromRemote(sel && sel.id !== 'auto' ? sel : { id: 'auto' }); }
+  function wakeUp() {
+    if (!saving()) return false;
+    document.body.classList.remove('saver'); clearInterval(saverCycle); restoreBg(); armIdle(); return true;
+  }
+  function sleepNow() {
+    hidePop(); go(0, 0);                       // back to the apps, close any open preview
+    document.body.classList.add('saver');
+    clearInterval(saverCycle); saverCycle = setInterval(() => window.nextBg && nextBg(1), 60 * 1000);
+  }
+  function armIdle() { clearTimeout(idleT); idleT = setTimeout(sleepNow, SAVER_MIN * 60 * 1000); }
+  ['mousemove', 'click', 'touchstart'].forEach((ev) => document.addEventListener(ev, () => { if (!wakeUp()) armIdle(); }, true));
+  document.addEventListener('keydown', () => { if (!saving()) armIdle(); }, true);
+  armIdle();
+
+  go(0, 0);   // start on the first app (kept last so everything above is defined)
+</script>
+</body>
+</html>

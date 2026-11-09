@@ -1,0 +1,107 @@
+[
+ {
+  "id": "auto",
+  "name": "Auto",
+  "file": null,
+  "credit": null,
+  "thumb": "thumbs/tahoe-day.jpg"
+ },
+ {
+  "id": "tahoe-dawn",
+  "name": "Tahoe Dawn",
+  "file": "assets/bg/tahoe-dawn.jpg",
+  "credit": "Tahoe Aerial, Apple · via Basic Apple Guy",
+  "thumb": "thumbs/tahoe-dawn.jpg"
+ },
+ {
+  "id": "tahoe-day",
+  "name": "Tahoe Day",
+  "file": "assets/bg/tahoe-day.jpg",
+  "credit": "Tahoe Aerial, Apple · via Basic Apple Guy",
+  "thumb": "thumbs/tahoe-day.jpg"
+ },
+ {
+  "id": "tahoe-dusk",
+  "name": "Tahoe Dusk",
+  "file": "assets/bg/tahoe-dusk.jpg",
+  "credit": "Tahoe Aerial, Apple · via Basic Apple Guy",
+  "thumb": "thumbs/tahoe-dusk.jpg"
+ },
+ {
+  "id": "tahoe-night",
+  "name": "Tahoe Night",
+  "file": "assets/bg/tahoe-night.jpg",
+  "credit": "Tahoe Aerial, Apple · via Basic Apple Guy",
+  "thumb": "thumbs/tahoe-night.jpg"
+ },
+ {
+  "id": "photo-01",
+  "name": "2013 Cogden Bridge",
+  "file": "assets/bg/bg01.jpg",
+  "credit": "Photo: 2013 Cogden Bridge · Kreuzschnabel · CC BY-SA 3.0",
+  "thumb": "thumbs/bg01.jpg"
+ },
+ {
+  "id": "photo-02",
+  "name": "2013 Rainbow over Washfold",
+  "file": "assets/bg/bg02.jpg",
+  "credit": "Photo: 2013 Rainbow over Washfold · Kreuzschnabel · CC BY-SA 3.0",
+  "thumb": "thumbs/bg02.jpg"
+ },
+ {
+  "id": "photo-03",
+  "name": "2014 Yorkshire Dales count",
+  "file": "assets/bg/bg03.jpg",
+  "credit": "Photo: 2014 Yorkshire Dales count · Kreuzschnabel · CC BY-SA 3.0",
+  "thumb": "thumbs/bg03.jpg"
+ },
+ {
+  "id": "photo-04",
+  "name": "AB BDe 4-4 Jakobsbad - Urn",
+  "file": "assets/bg/bg04.jpg",
+  "credit": "Photo: AB BDe 4-4 Jakobsbad - Urn · Kabelleger / David Gubler · CC BY-SA 3.0",
+  "thumb": "thumbs/bg04.jpg"
+ },
+ {
+  "id": "photo-05",
+  "name": "Aguarales de Valpalmas",
+  "file": "assets/bg/bg05.jpg",
+  "credit": "Photo: Aguarales de Valpalmas · Diego Delso · CC BY-SA 4.0",
+  "thumb": "thumbs/bg05.jpg"
+ },
+ {
+  "id": "photo-06",
+  "name": "Algar do Carvao",
+  "file": "assets/bg/bg06.jpg",
+  "credit": "Photo: Algar do Carvao · Diego Delso · CC BY-SA 4.0",
+  "thumb": "thumbs/bg06.jpg"
+ },
+ {
+  "id": "photo-07",
+  "name": "Amanecer en el lago Titica",
+  "file": "assets/bg/bg07.jpg",
+  "credit": "Photo: Amanecer en el lago Titica · Diego Delso · CC BY-SA 4.0",
+  "thumb": "thumbs/bg07.jpg"
+ },
+ {
+  "id": "photo-08",
+  "name": "Andiast-Breil-Brigels. 24-",
+  "file": "assets/bg/bg08.jpg",
+  "credit": "Photo: Andiast-Breil-Brigels. 24- · Dominicus Johannes Bergsma. · CC BY-SA 4.0",
+  "thumb": "thumbs/bg08.jpg"
+ },
+ {
+  "id": "photo-09",
+  "name": "Anfiteatro",
+  "file": "assets/bg/bg09.jpg",
+  "credit": "Photo: Anfiteatro · Diego Delso · CC BY-SA 4.0",
+  "thumb": "thumbs/bg09.jpg"
+ },
+ {
+  "id": "photo-10",
+  "name": "Berchtesgaden 02",
+  "file": "assets/bg/bg10.jpg",
+  "credit": "Photo: Berchtesgaden 02 · Dmytro Balkhovitin · CC BY-SA 4.0",
+  "thumb": "thumbs/bg10.jpg"
+ }
+]

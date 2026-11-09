@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b0c12">
+<title>TV Remote</title>
+<style>
+  :root { --bg: #0b0c12; --glass: rgba(255,255,255,.09); --glass2: rgba(255,255,255,.16); --text: #f5f5f7; --muted: rgba(245,245,247,.55); --accent: #0a84ff; --red: #ff453a; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; }
+  html, body { background: var(--bg); color: var(--text); }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased;
+    min-height: 100vh; padding: max(14px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    background: radial-gradient(120% 60% at 50% -10%, #2b2f6e55, transparent 60%), var(--bg); max-width: 460px; margin: 0 auto; user-select: none; -webkit-user-select: none; }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .status { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #666; }
+  .dot.on { background: #30d158; box-shadow: 0 0 8px #30d158aa; } .dot.wait { background: #ffd60a; }
+  button { font: inherit; color: inherit; border: 0; background: var(--glass); border-radius: 18px; padding: 0; cursor: pointer; transition: transform .08s, background .15s; }
+  button:active { transform: scale(.93); background: var(--glass2); }
+  .power { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,69,58,.18); display: grid; place-items: center; }
+  .power svg { width: 22px; height: 22px; stroke: var(--red); }
+  svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .card { background: var(--glass); border-radius: 26px; padding: 14px; margin-bottom: 14px; -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); }
+  h3 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 2px 4px 10px; }
+
+  /* d-pad */
+  .dpad { position: relative; width: 250px; height: 250px; margin: 6px auto 12px; border-radius: 50%; background: var(--glass2); }
+  .dpad button { position: absolute; background: transparent; width: 84px; height: 84px; display: grid; place-items: center; border-radius: 50%; }
+  .dpad button:active { background: rgba(255,255,255,.2); }
+  .dpad svg { width: 26px; height: 26px; }
+  .u { top: 4px; left: 83px; } .d { bottom: 4px; left: 83px; } .l { left: 4px; top: 83px; } .r { right: 4px; top: 83px; }
+  .ok { top: 80px; left: 80px; width: 90px !important; height: 90px !important; background: rgba(255,255,255,.14) !important; font-weight: 600; font-size: 17px; }
+  .row { display: grid; gap: 10px; }
+  .row.c3 { grid-template-columns: repeat(3, 1fr); } .row.c2 { grid-template-columns: repeat(2, 1fr); } .row.c4 { grid-template-columns: repeat(4, 1fr); } .row.c5 { grid-template-columns: repeat(5, 1fr); }
+  .row button { height: 54px; display: grid; place-items: center; font-size: 15px; font-weight: 500; }
+  .row button svg { width: 22px; height: 22px; }
+  .vol { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pill { display: grid; grid-template-rows: 1fr 1fr; background: var(--glass2); border-radius: 26px; overflow: hidden; height: 150px; }
+  .pill button { border-radius: 0; background: transparent; font-size: 26px; font-weight: 300; }
+  .pill button:active { background: rgba(255,255,255,.18); }
+  .pill .lab { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; letter-spacing: .06em; }
+  .pill.vp button { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* apps */
+  .apps button { height: 86px; padding: 0; overflow: hidden; border-radius: 20px; }
+  .apps img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .apps .gear { background: #3a3b40; } .apps .gear svg { width: 34px; height: 34px; stroke: #e8e8ec; }
+  .chips button { height: 44px; font-size: 15px; }
+
+  #pad { height: 190px; border-radius: 22px; background: var(--glass2); display: grid; place-items: center; text-align: center; padding: 16px; color: var(--muted); font-size: 13px; touch-action: none; }
+  #pad.on { background: rgba(255,255,255,.22); }
+
+  /* backgrounds */
+  .bgs { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 8px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+  .bgs button { flex: 0 0 112px; height: 76px; position: relative; border-radius: 16px; overflow: hidden; scroll-snap-align: start; padding: 0; }
+  .bgs img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bgs span { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 8px 5px; font-size: 11.5px; font-weight: 600; text-align: left; background: linear-gradient(transparent, rgba(0,0,0,.7)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bgs button.cur { outline: 3px solid var(--accent); outline-offset: -3px; }
+
+  .wchip { display: inline-flex; align-items: center; gap: 8px; margin: 0 8px 8px 0; padding: 8px 12px; border-radius: 99px; background: rgba(255,255,255,.12); font-size: 14px; }
+  .wchip i { font-style: normal; opacity: .6; }
+
+  .seg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .seg2 button { height: 40px; font-size: 15px; background: rgba(255,255,255,.08); } .seg2 button.sel { background: var(--accent); }
+  .sw { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sw button { width: 38px; height: 38px; border-radius: 50%; font-size: 15px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+  .sw button.sel { outline: 3px solid #fff; outline-offset: 2px; }
+
+  .fonts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px; }
+  .fonts button { height: 62px; font-size: 30px; font-weight: 700; background: rgba(255,255,255,.08); } .fonts button.sel { box-shadow: inset 0 0 0 2px rgba(255,255,255,.7); background: rgba(255,255,255,.16); }
+  .sl { display: grid; grid-template-columns: 58px 1fr; align-items: center; gap: 10px; margin-top: 12px; font-size: 13px; color: var(--muted); }
+  .sl input[type=range] { width: 100%; accent-color: #fff; height: 28px; }
+
+  .wres { display: grid; gap: 8px; margin-top: 10px; }
+  .wres button { display: grid; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; text-align: left; padding: 6px 10px 6px 6px; border-radius: 14px; background: rgba(255,255,255,.08); }
+  .wres img, .wi img { width: 44px; height: 62px; object-fit: cover; border-radius: 8px; background: rgba(255,255,255,.1); }
+  .wres small, .wi small { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .wres .add { font-size: 13px; font-weight: 600; color: var(--accent); }
+  .wlist { display: grid; gap: 10px; margin-top: 12px; }
+  .wi { display: grid; grid-template-columns: 44px 1fr; gap: 10px; padding: 8px; border-radius: 16px; background: rgba(255,255,255,.06); }
+  .wi b { font-size: 15px; }
+  .wi .ctl { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .wi .ctl button { height: 38px; font-size: 13px; border-radius: 12px; }
+  .wi .ctl .wok { background: #30d15833; color: #7dffa1; } .wi .ctl .wrm { background: #ff453a26; color: #ff8a82; }
+  .wi .pg { grid-column: 1 / -1; display: grid; grid-template-columns: 64px 1fr 40px; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .wi .pg input { width: 100%; accent-color: #e50914; }
+  .wi select { grid-column: 1 / -1; height: 36px; border-radius: 10px; border: 0; background: rgba(255,255,255,.1); color: var(--text); font-size: 14px; padding: 0 10px; }
+
+  /* search */
+  .search { display: flex; gap: 8px; }
+  input[type=text], input[type=search] { flex: 1; min-width: 0; height: 46px; border-radius: 14px; border: 0; background: rgba(255,255,255,.1); color: var(--text); font-size: 16px; padding: 0 14px; outline: none; user-select: text; -webkit-user-select: text; }
+  .search button { height: 46px; padding: 0 16px; font-weight: 600; background: var(--accent); }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 8px 4px 0; line-height: 1.4; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .seg button { height: 38px; font-size: 14px; background: rgba(255,255,255,.08); } .seg button.sel { background: var(--accent); }
+
+  /* setup + toast */
+  #setup { display: none; } #setup.on { display: block; }
+  #msg { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translate(-50%, 80px); background: #1c1c1ee6; padding: 10px 16px; border-radius: 99px; font-size: 14px; transition: transform .25s; max-width: 90vw; }
+  #msg.show { transform: translate(-50%, 0); }
+</style>
+</head>
+<body>
+<header>
+  <div class="status"><span class="dot" id="dot"></span><span id="st">Connecting…</span></div>
+  <button class="power" id="pwr" aria-label="Power"><svg viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.3 6.8a8 8 0 1011.4 0"/></svg></button>
+</header>
+
+<div class="card" id="setup">
+  <h3>Connect your TV</h3>
+  <div class="search"><input type="text" id="ip" inputmode="decimal" placeholder="TV address, e.g. 192.168.1.20" autocomplete="off"><button id="save">Connect</button></div>
+  <p class="hint">On the TV: Settings → General → Network → Wi-Fi (or Ethernet) → Advanced. Copy the IP address. Then accept the request that appears on the TV screen.</p>
+</div>
+
+<div class="card">
+  <div class="dpad">
+    <button class="u" data-b="UP" aria-label="Up"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+    <button class="l" data-b="LEFT" aria-label="Left"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button class="ok" data-b="ENTER">OK</button>
+    <button class="r" data-b="RIGHT" aria-label="Right"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button class="d" data-b="DOWN" aria-label="Down"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+  </div>
+  <div class="row c3">
+    <button data-b="BACK" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M9 7L4 12l5 5"/><path d="M4 12h10a6 6 0 010 8h-3"/></svg></button>
+    <button data-b="HOME" aria-label="Home"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg></button>
+    <button data-b="MENU" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="vol">
+    <div class="pill vp"><button data-vol="up">+<span class="lab">VOLUME</span></button><button data-vol="down">−</button></div>
+    <div class="pill vp"><button data-b="CHANNELUP">▲<span class="lab">CHANNEL</span></button><button data-b="CHANNELDOWN">▼</button></div>
+  </div>
+  <div class="row c4" style="margin-top:10px">
+    <button data-act="mute" aria-label="Mute"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l4 6M21 9l-4 6"/></svg></button>
+    <button data-b="REWIND" aria-label="Rewind"><svg viewBox="0 0 24 24"><path d="M11 6l-7 6 7 6zM20 6l-7 6 7 6z"/></svg></button>
+    <button data-b="PLAY" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z"/></svg></button>
+    <button data-b="PAUSE" aria-label="Pause"><svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg></button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Trackpad</h3>
+  <div id="pad" aria-label="Trackpad"><span>Drag to move the cursor · tap to click · two fingers to scroll</span></div>
+</div>
+
+<div class="card">
+  <h3>Apps</h3>
+  <div class="row c3 apps">
+    <button data-app="netflix"><img src="img/netflix.jpg?v=2" alt="Netflix"></button>
+    <button data-app="disney"><img src="img/disney.jpg" alt="Disney+"></button>
+    <button data-app="prime"><img src="img/prime.jpg" alt="Prime Video"></button>
+    <button data-app="youtube"><img src="img/youtube.jpg" alt="YouTube"></button>
+    <button data-app="itvx"><img src="img/itvx.jpg" alt="ITVX" style="transform:scale(1.22)"></button>
+    <button data-app="iplayer"><img src="img/iplayer.jpg?v=2" alt="BBC iPlayer"></button>
+    <button data-app="firetv"><img src="img/firestick.jpg" alt="Amazon Fire Stick"></button>
+    <button data-app="playstation" aria-label="PlayStation"><img src="img/playstation.jpg" alt="PlayStation" style="transform:scale(1.16)"></button>
+    <button data-app="switch" aria-label="Nintendo Switch"><img src="img/switch.jpg" alt="Nintendo Switch" style="transform:scale(1.16)"></button>
+    <button data-app="store" style="background:linear-gradient(180deg,#46a8ff,#0b57d6)" aria-label="Content Store"><svg viewBox="0 0 24 24" style="width:36px;height:36px" stroke="#fff"><path d="M5.5 8.5h13l1 11.5h-15z"/><path d="M9 8.5V7.2a3 3 0 016 0v1.3"/><path d="M9.5 13a2.5 2.5 0 005 0"/></svg></button>
+    <button data-app="settings" style="background:#76777c"><img src="img/settings.png" alt="TV settings" style="transform:scale(1.22)"></button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Continue watching (TV screen)</h3>
+  <div class="search"><input type="search" id="wq" placeholder="Find a show to add…" autocomplete="off" enterkeyhint="search"><button id="wgo">Find</button></div>
+  <div id="wres" class="wres"></div>
+  <div id="wlist" class="wlist"></div>
+  <p class="hint">Netflix and the other apps don't share what you've watched, so this list is yours. Tap <b>Watched</b> after an episode and the TV moves you on to the next one. On the TV, the green button does the same and red removes a show.</p>
+</div>
+
+<div class="card">
+  <h3>Clock (TV)</h3>
+  <div class="fonts" id="cfont"><button data-f="rounded" class="sel" style="font-family:ui-rounded,'SF Pro Rounded',-apple-system,Arial,sans-serif">12</button><button data-f="classic" style="font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif">12</button><button data-f="serif" style="font-family:'New York',Georgia,serif">12</button><button data-f="condensed" style="font-family:'Arial Narrow','Avenir Next Condensed',Impact,sans-serif">12</button></div>
+  <label class="sl"><span>Stretch</span><input type="range" id="cstretch" min="0" max="100" value="28"></label>
+  <div class="sw" id="ctint" style="margin:14px 0 4px"><button data-t="#ffffff" style="background:#fff" class="sel" aria-label="White"></button><button data-t="#a8e1ff" style="background:#a8e1ff" aria-label="Sky"></button><button data-t="#b6c8ff" style="background:#b6c8ff" aria-label="Periwinkle"></button><button data-t="#d8c8ff" style="background:#d8c8ff" aria-label="Lavender"></button><button data-t="#d98cff" style="background:#d98cff" aria-label="Purple"></button><button data-t="#ffb3d1" style="background:#ffb3d1" aria-label="Pink"></button><button data-t="#f3dcc0" style="background:#f3dcc0" aria-label="Sand"></button><button data-t="#ffe08a" style="background:#ffe08a" aria-label="Gold"></button></div>
+  <label class="sl"><span>Glass</span><input type="range" id="cglass" min="0" max="100" value="80"></label>
+  <div class="seg2" id="cstyle" style="margin:14px 0 0"><button data-s="glass" class="sel">Glass</button><button data-s="solid">Solid</button></div>
+</div>
+
+<div class="card">
+  <h3>App icons (TV)</h3>
+  <div class="seg2" id="istyle"><button data-s="normal" class="sel">Normal</button><button data-s="glass">Glass</button></div>
+  <div class="sw" id="itint"><button data-t="" class="sel" aria-label="No colour">✕</button>
+    <button data-t="#ff453a" style="background:#ff453a" aria-label="Red"></button><button data-t="#ff9f0a" style="background:#ff9f0a" aria-label="Orange"></button>
+    <button data-t="#ffd60a" style="background:#ffd60a" aria-label="Yellow"></button><button data-t="#30d158" style="background:#30d158" aria-label="Green"></button>
+    <button data-t="#64d2ff" style="background:#64d2ff" aria-label="Sky"></button><button data-t="#0a84ff" style="background:#0a84ff" aria-label="Blue"></button>
+    <button data-t="#bf5af2" style="background:#bf5af2" aria-label="Purple"></button><button data-t="#ff375f" style="background:#ff375f" aria-label="Pink"></button>
+    <button data-t="#8e8e93" style="background:#8e8e93" aria-label="Grey"></button></div>
+  <p class="hint">Glass makes the app icons see-through like Apple's. The colour tints every icon on the TV shelf.</p>
+</div>
+
+<div class="card">
+  <h3>TV background</h3>
+  <div class="bgs" id="bgs"></div>
+  <p class="hint">Changes the picture behind the clock on your TV's home screen. “Auto” follows the time of day.</p>
+</div>
+
+<div class="card">
+  <h3>Inputs</h3>
+  <div class="row c3 chips"><button data-in="1">HDMI 1</button><button data-in="2">HDMI 2</button><button data-in="3">HDMI 3</button></div>
+</div>
+
+<div class="card">
+  <h3>Search &amp; type</h3>
+  <div class="search"><input type="search" id="q" placeholder="Search for something…" autocomplete="off" enterkeyhint="search"><button id="go">Go</button></div>
+  <div class="seg" id="seg"><button data-w="youtube" class="sel">YouTube</button><button data-w="web">Google</button><button data-w="type">Type on TV</button></div>
+  <p class="hint" id="shint">Opens the search in the TV's web browser. Searching inside Netflix, Disney+ or Prime isn't possible from outside the app, so use “Type on TV” to fill in the app's own search box.</p>
+</div>
+
+<div class="card">
+  <h3>Numbers</h3>
+  <div class="row c3">
+    <button data-b="1">1</button><button data-b="2">2</button><button data-b="3">3</button>
+    <button data-b="4">4</button><button data-b="5">5</button><button data-b="6">6</button>
+    <button data-b="7">7</button><button data-b="8">8</button><button data-b="9">9</button>
+    <button data-b="INFO">Info</button><button data-b="0">0</button><button data-b="EXIT">Exit</button>
+  </div>
+</div>
+
+<div id="msg"></div>
+
+<script>
+  const $ = (s) => document.querySelector(s);
+  const msg = $('#msg'); let msgT;
+  function toast(t) { msg.textContent = t; msg.classList.add('show'); clearTimeout(msgT); msgT = setTimeout(() => msg.classList.remove('show'), 2200); }
+  async function act(name, body) {
+    if (navigator.vibrate) navigator.vibrate(8);
+    try {
+      const r = await (await fetch('/api/' + name, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) })).json();
+      if (!r.ok) toast(r.error || 'Something went wrong');
+      return r.ok;
+    } catch (e) { toast("Can't reach the remote server"); return false; }
+  }
+
+  // buttons
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.b) act('button', { name: t.dataset.b });
+    else if (t.dataset.vol) act('volume', { dir: t.dataset.vol });
+    else if (t.dataset.act === 'mute') act('mute');
+    else if (t.dataset.app) act('app', { name: t.dataset.app });
+    else if (t.dataset.in) act('input', { n: t.dataset.in });
+  });
+
+  // trackpad: drag = move, tap = click, two fingers = scroll
+  (function () {
+    const pad = $('#pad'); let last = null, moved = 0, t0 = 0, dx = 0, dy = 0, sy = 0, timer = null, multi = false;
+    const send = (body) => fetch('/api/pointer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => {});
+    const flush = () => { if (dx || dy) { send({ dx: dx, dy: dy }); dx = dy = 0; } if (sy) { send({ scroll: sy }); sy = 0; } };
+    const pos = (e) => { const t = e.touches; return t.length > 1 ? { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2, n: t.length } : { x: t[0].clientX, y: t[0].clientY, n: 1 }; };
+    pad.addEventListener('touchstart', (e) => { e.preventDefault(); const p = pos(e); last = p; moved = 0; t0 = Date.now(); multi = p.n > 1; pad.classList.add('on'); timer = setInterval(flush, 45); }, { passive: false });
+    pad.addEventListener('touchmove', (e) => { e.preventDefault(); const p = pos(e); if (!last) return; const mx = p.x - last.x, my = p.y - last.y; moved += Math.abs(mx) + Math.abs(my);
+      if (p.n > 1) { multi = true; sy += my * 1.5; } else { dx += mx * 1.8; dy += my * 1.8; } last = p; }, { passive: false });
+    const end = () => { clearInterval(timer); flush(); pad.classList.remove('on'); if (moved < 8 && Date.now() - t0 < 300 && !multi) { if (navigator.vibrate) navigator.vibrate(8); send({ click: true }); } last = null; };
+    pad.addEventListener('touchend', end); pad.addEventListener('touchcancel', end);
+    // mouse (for testing on a computer)
+    let md = false; pad.addEventListener('mousedown', (e) => { md = true; last = { x: e.clientX, y: e.clientY }; moved = 0; t0 = Date.now(); timer = setInterval(flush, 45); });
+    window.addEventListener('mousemove', (e) => { if (!md) return; dx += (e.clientX - last.x) * 1.8; dy += (e.clientY - last.y) * 1.8; moved += Math.abs(e.movementX) + Math.abs(e.movementY); last = { x: e.clientX, y: e.clientY }; });
+    window.addEventListener('mouseup', () => { if (!md) return; md = false; clearInterval(timer); flush(); if (moved < 8 && Date.now() - t0 < 300) send({ click: true }); });
+  })();
+
+  // hold-to-repeat for the d-pad and volume
+  let rep;
+  document.querySelectorAll('.dpad button[data-b], [data-vol]').forEach((b) => {
+    b.addEventListener('touchstart', () => { rep = setTimeout(function loop() { b.click(); rep = setTimeout(loop, 130); }, 450); }, { passive: true });
+    ['touchend', 'touchcancel'].forEach((ev) => b.addEventListener(ev, () => clearTimeout(rep)));
+  });
+
+  // power: tap = off, long press = on (Wake-on-LAN)
+  let pt; const pwr = $('#pwr');
+  pwr.addEventListener('pointerdown', () => { pt = setTimeout(() => { pt = null; act('on').then((ok) => ok && toast('Turning on…')); }, 700); });
+  pwr.addEventListener('pointerup', () => { if (pt) { clearTimeout(pt); act('off'); } });
+
+  // search / type
+  let where = 'youtube';
+  $('#seg').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    where = b.dataset.w; document.querySelectorAll('#seg button').forEach((x) => x.classList.toggle('sel', x === b));
+    $('#shint').textContent = where === 'type'
+      ? 'Sends the text to the TV’s on-screen keyboard. Open the search box in the app on the TV first, then type here.'
+      : 'Opens the search in the TV’s web browser. Searching inside Netflix, Disney+ or Prime isn’t possible from outside the app, so use “Type on TV” for their own search boxes.';
+  });
+  async function doSearch() {
+    const v = $('#q').value.trim(); if (!v) return;
+    if (where === 'type') { if (await act('type', { text: v })) { toast('Sent to TV'); $('#q').value = ''; } }
+    else if (await act('search', { q: v, where })) toast('Opening on TV…');
+  }
+  $('#go').addEventListener('click', doSearch);
+  $('#q').addEventListener('keydown', (e) => { if (e.key === 'Enter') doSearch(); });
+
+  // backgrounds
+  async function loadBgs() {
+    try {
+      const d = await (await fetch('/api/bgs')).json();
+      const box = $('#bgs');
+      box.innerHTML = d.list.map((b) => '<button data-bg="' + b.id + '"' + (b.id === d.current ? ' class="cur"' : '') + '><img src="' + b.thumb + '" alt="" loading="lazy"><span>' + b.name + '</span></button>').join('');
+    } catch (e) {}
+  }
+  $('#bgs').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-bg]'); if (!b) return;
+    if (await act('bg', { id: b.dataset.bg })) { document.querySelectorAll('#bgs button').forEach((x) => x.classList.toggle('cur', x === b)); toast('Background changed'); }
+  });
+  loadBgs();
+
+  // Continue watching: find a show, then keep its episode and progress up to date
+  const SVC = { netflix: 'Netflix', disney: 'Disney+', prime: 'Prime Video', iplayer: 'BBC iPlayer', itvx: 'ITVX', youtube: 'YouTube', other: 'Other app' };
+  const h = (t) => String(t == null ? '' : t).replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+  async function findShows() {
+    const q = $('#wq').value.trim(); if (!q) return;
+    $('#wres').innerHTML = '<span class="hint">Searching…</span>';
+    try {
+      const r = await (await fetch('/api/showsearch?q=' + encodeURIComponent(q))).json();
+      $('#wres').innerHTML = r.length ? r.map((x) => '<button data-id="' + x.id + '" data-name="' + h(x.name) + '" data-svc="' + x.service + '"><img src="' + h(x.image || '') + '" alt=""><span><b>' + h(x.name) + '</b><small>' + h([x.year, x.network].filter(Boolean).join(' · ')) + '</small></span><span class="add">Add</span></button>').join('') : '<span class="hint">No shows found.</span>';
+    } catch (e) { $('#wres').innerHTML = '<span class="hint">Search isn’t working right now.</span>'; }
+  }
+  $('#wgo').addEventListener('click', findShows);
+  $('#wq').addEventListener('keydown', (e) => { if (e.key === 'Enter') findShows(); });
+  $('#wres').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-id]'); if (!b) return;
+    if (await act('watch', { op: 'add', tvmaze: b.dataset.id, title: b.dataset.name, service: b.dataset.svc })) { toast('Added to Continue watching'); $('#wres').innerHTML = ''; $('#wq').value = ''; loadWatch(); }
+  });
+  async function loadWatch() {
+    try {
+      const l = await (await fetch('/api/watching')).json();
+      $('#wlist').innerHTML = l.length ? l.map((x) => {
+        const pct = Math.round((x.progress || 0) * 100);
+        return '<div class="wi" data-key="' + h(x.key) + '"><img src="' + h(x.image || '') + '" alt=""><span><b>' + h(x.title) + '</b><small>S' + x.season + ' E' + x.episode + (x.epName ? ' · ' + h(x.epName) : '') + (x.badge ? ' · ' + h(x.badge) : '') + '</small></span>' +
+          '<label class="pg"><span>Watched so far</span><input type="range" min="0" max="100" step="5" value="' + pct + '" data-pg><span>' + pct + '%</span></label>' +
+          '<div class="ctl"><button data-op="prev">◀ Ep</button><button data-op="nextep">Ep ▶</button><button class="wok" data-op="next">Watched</button><button class="wrm" data-op="remove">Remove</button></div>' +
+          '<select data-svc>' + Object.keys(SVC).map((k) => '<option value="' + k + '"' + (k === x.service ? ' selected' : '') + '>Watching on ' + SVC[k] + '</option>').join('') + '</select></div>';
+      }).join('') : '<span class="hint">Nothing here yet. Find a show above to add it.</span>';
+      $('#wlist').querySelectorAll('.wi').forEach((el) => { const x = l.find((y) => y.key === el.dataset.key); el._x = x; });
+    } catch (e) {}
+  }
+  $('#wlist').addEventListener('click', async (e) => {
+    const b = e.target.closest('button[data-op]'); if (!b) return;
+    const el = b.closest('.wi'), x = el._x, op = b.dataset.op;
+    let ok;
+    if (op === 'next' || op === 'remove') ok = await act('watch', { op: op, key: x.key });
+    else ok = await act('watch', { op: 'update', key: x.key, episode: Math.max(1, x.episode + (op === 'nextep' ? 1 : -1)), progress: 0 });
+    if (ok) { if (op === 'next') toast('Watched · on to the next episode'); loadWatch(); }
+  });
+  $('#wlist').addEventListener('change', async (e) => {
+    const el = e.target.closest('.wi'); if (!el) return;
+    if (e.target.matches('[data-pg]')) { e.target.nextElementSibling.textContent = e.target.value + '%'; await act('watch', { op: 'update', key: el._x.key, progress: Number(e.target.value) / 100 }); }
+    if (e.target.matches('[data-svc]')) { await act('watch', { op: 'update', key: el._x.key, service: e.target.value }); loadWatch(); }
+  });
+  $('#wlist').addEventListener('input', (e) => { if (e.target.matches('[data-pg]')) e.target.nextElementSibling.textContent = e.target.value + '%'; });
+  loadWatch();
+
+  // app icon look
+  let ic = { style: 'normal', tint: '' };
+  function showIcons() {
+    document.querySelectorAll('#istyle button').forEach((b) => b.classList.toggle('sel', b.dataset.s === ic.style));
+    document.querySelectorAll('#itint button').forEach((b) => b.classList.toggle('sel', b.dataset.t === ic.tint));
+  }
+  async function loadIcons() { try { ic = await (await fetch('/api/icons')).json(); showIcons(); } catch (e) {} }
+  $('#istyle').addEventListener('click', async (e) => { const b = e.target.closest('button'); if (!b) return; ic.style = b.dataset.s; showIcons(); await act('icons', ic); });
+  $('#itint').addEventListener('click', async (e) => { const b = e.target.closest('button'); if (!b) return; ic.tint = b.dataset.t; showIcons(); await act('icons', ic); });
+  loadIcons();
+
+  // clock look
+  let ck = { font: 'condensed', stretch: 28, tint: '#a8e1ff', glass: 80, style: 'glass' }, ckT = null;
+  function showClock() {
+    document.querySelectorAll('#cfont button').forEach((b) => b.classList.toggle('sel', b.dataset.f === ck.font));
+    document.querySelectorAll('#ctint button').forEach((b) => b.classList.toggle('sel', b.dataset.t === ck.tint));
+    document.querySelectorAll('#cstyle button').forEach((b) => b.classList.toggle('sel', b.dataset.s === ck.style));
+    $('#cstretch').value = ck.stretch; $('#cglass').value = ck.glass;
+  }
+  const pushClock = () => { clearTimeout(ckT); ckT = setTimeout(() => act('clock', ck), 120); };
+  async function loadClock() { try { ck = await (await fetch('/api/clock')).json(); showClock(); } catch (e) {} }
+  $('#cfont').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; ck.font = b.dataset.f; showClock(); pushClock(); });
+  $('#ctint').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; ck.tint = b.dataset.t; showClock(); pushClock(); });
+  $('#cstyle').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; ck.style = b.dataset.s; showClock(); pushClock(); });
+  $('#cstretch').addEventListener('input', (e) => { ck.stretch = Number(e.target.value); pushClock(); });
+  $('#cglass').addEventListener('input', (e) => { ck.glass = Number(e.target.value); pushClock(); });
+  loadClock();
+
+  // setup
+  $('#save').addEventListener('click', async () => { const h = $('#ip').value.trim(); if (h && await act('config', { host: h })) { toast('Connecting… accept the prompt on the TV'); poll(); } });
+
+  // status
+  async function poll() {
+    try {
+      const s = await (await fetch('/api/status')).json();
+      $('#dot').className = 'dot ' + (s.connected ? 'on' : s.prompt ? 'wait' : '');
+      $('#st').textContent = s.connected ? 'Connected' + (s.volume != null ? ' · Vol ' + s.volume : '') : s.prompt ? 'Accept the request on your TV' : (s.host ? 'Not connected' : 'No TV set up');
+      $('#setup').classList.toggle('on', !s.host || (!s.connected && !s.prompt && !!s.error));
+      if (s.host && !$('#ip').value) $('#ip').value = s.host;
+    } catch (e) { $('#st').textContent = 'Remote server not running'; }
+  }
+  poll(); setInterval(poll, 3000);
+</script>
+</body>
+</html>

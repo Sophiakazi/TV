@@ -1,0 +1,13 @@
+{
+  "id": "com.sophia.home",
+  "version": "1.0.0",
+  "vendor": "Sophia",
+  "type": "web",
+  "main": "index.html",
+  "title": "Home",
+  "icon": "icon.png",
+  "largeIcon": "largeIcon.png",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true,
+  "requiredACG": ["application.launcher"]
+}

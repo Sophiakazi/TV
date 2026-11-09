@@ -1,0 +1,20 @@
+# This repo is public. These stay on the Mac only:
+
+# keys and personal data
+tv-remote/.tmdb-key
+tv-remote/.tv-key
+tv-remote/config.json
+tv-remote/watching.json
+
+# settings the phone remote rewrites every time they change
+tv-remote/clock.json
+tv-remote/icons.json
+
+# Apple's Tahoe wallpaper is Apple's artwork, so it isn't republished here
+tv-home/assets/bg/tahoe-*.jpg
+tv-remote/public/thumbs/tahoe-*.jpg
+
+# build output and clutter
+node_modules/
+*.ipk
+.DS_Store
