@@ -418,6 +418,8 @@
   .pager.p2 .screen > .info, .pager.p3 .screen > .info { opacity: 0; transition: top 1.4s cubic-bezier(.2,.8,.2,1), transform 1.4s cubic-bezier(.2,.8,.2,1), opacity .45s ease; }
   .screen2, .screen3 { opacity: 0; transition: opacity .45s ease; }
   .pager.p2 .screen2, .pager.p3 .screen3 { opacity: 1; transition: opacity .75s ease .12s; }
+  /* Inputs: room around the row so the selected tile (it grows a little) keeps its edges, white ring and shadow */
+  .screen3 .rowbox { padding: 2.1vw 3vw 3.6vw !important; margin: 0 -3vw !important; }
 </style>
 </head>
 <body>
@@ -461,8 +463,12 @@
 
 <section class="screen2" id="screen2">
 <div class="s2in" id="s2in">
+  <div class="panel">
+    <h2>Top 10 Series in the UK Today<span id="topTitle"></span></h2>
+    <div class="rowbox"><div class="track" id="topRow"></div></div>
+  </div>
   <div class="panel" id="contPanel" style="display:none">
-    <h2>Continue watching<span class="cwkeys"><i style="background:#30d158"></i>Watched <i style="background:#ff453a"></i>Remove</span></h2>
+    <h2>Continue watching</h2>
     <div class="rowbox"><div class="track" id="contRow"></div></div>
   </div>
   <div class="panel" id="pickPanel" style="display:none">
@@ -476,10 +482,6 @@
   <div class="panel">
     <h2>Recommended <span>this week · UK</span></h2>
     <div class="rowbox"><div class="track" id="recRow"></div></div>
-  </div>
-  <div class="panel">
-    <h2>Top 10 Series in the UK Today<span id="topTitle"></span></h2>
-    <div class="rowbox"><div class="track" id="topRow"></div></div>
   </div>
 </div>
   <div class="back">▲ Back</div>
@@ -504,7 +506,7 @@
 <script>
   // ---- background: video wins, else photo slideshow, else the painted scene ----
   // Put 4K photos (3840x2160 .jpg) in assets/bg/ and list them here, e.g. ['assets/bg/desert.jpg', 'assets/bg/coast.jpg']
-  const BG_IMAGES = [{"f": "assets/bg/bg01.jpg", "c": "2013 Cogden Bridge · Kreuzschnabel · CC BY-SA 3.0"}, {"f": "assets/bg/bg02.jpg", "c": "2013 Rainbow over Washfold · Kreuzschnabel · CC BY-SA 3.0"}, {"f": "assets/bg/bg03.jpg", "c": "2014 Yorkshire Dales country road  · Kreuzschnabel · CC BY-SA 3.0"}, {"f": "assets/bg/bg04.jpg", "c": "AB BDe 4-4 Jakobsbad - Urnäsch · Kabelleger / David Gubler · CC BY-SA 3.0"}, {"f": "assets/bg/bg05.jpg", "c": "Aguarales de Valpalmas · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg06.jpg", "c": "Algar do Carvao · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg07.jpg", "c": "Amanecer en el lago Titicaca · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg08.jpg", "c": "Andiast-Breil-Brigels. 24-09-2025. · Dominicus Johannes Bergsma. · CC BY-SA 4.0"}, {"f": "assets/bg/bg09.jpg", "c": "Anfiteatro · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg10.jpg", "c": "Berchtesgaden 02 · Dmytro Balkhovitin · CC BY-SA 4.0"}];
+  const BG_IMAGES = [{"f": "assets/bg/bg01.jpg", "c": "2013 Cogden Bridge · Kreuzschnabel · CC BY-SA 3.0"}, {"f": "assets/bg/bg02.jpg", "c": "2013 Rainbow over Washfold · Kreuzschnabel · CC BY-SA 3.0"}, {"f": "assets/bg/bg03.jpg", "c": "2014 Yorkshire Dales country road  · Kreuzschnabel · CC BY-SA 3.0"}, {"f": "assets/bg/bg04.jpg", "c": "AB BDe 4-4 Jakobsbad - Urnäsch · Kabelleger / David Gubler · CC BY-SA 3.0"}, {"f": "assets/bg/bg05.jpg", "c": "Aguarales de Valpalmas · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg06.jpg", "c": "Algar do Carvao · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg07.jpg", "c": "Amanecer en el lago Titicaca · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg08.jpg", "c": "Andiast-Breil-Brigels. 24-09-2025. · Dominicus Johannes Bergsma. · CC BY-SA 4.0"}, {"f": "assets/bg/bg09.jpg", "c": "Anfiteatro · Diego Delso · CC BY-SA 4.0"}, {"f": "assets/bg/bg10.jpg", "c": "Berchtesgaden 02 · Dmytro Balkhovitin · CC BY-SA 4.0"}, {"f": "assets/bg/bg11.jpg", "c": "Lofoten, Norway · Johannes Groll · CC0"}, {"f": "assets/bg/bg12.jpg", "c": "Odles da Secëda · Wolfgang Moroder · CC BY-SA 3.0"}, {"f": "assets/bg/bg13.jpg", "c": "Kirkjufell, Iceland · Jakub Hałun · CC BY 4.0"}, {"f": "assets/bg/bg14.jpg", "c": "Matterhorn from Grindjisee · Roy Egloff · CC BY-SA 4.0"}, {"f": "assets/bg/bg15.jpg", "c": "Geirangerfjord from Ørnesvingen · Ximonic (Simo Räsänen) · CC BY-SA 3.0"}, {"f": "assets/bg/bg16.jpg", "c": "Tunnel View, Yosemite · Diliff · CC BY-SA 3.0"}, {"f": "assets/bg/bg17.jpg", "c": "Three domes of Oia, Santorini · Giles Laurent · CC BY-SA 4.0"}, {"f": "assets/bg/bg18.jpg", "c": "Mount Fuji at sunset · Romain Guy · CC0"}, {"f": "assets/bg/bg19.jpg", "c": "Quiraing, Isle of Skye · Diliff · CC BY-SA 3.0"}, {"f": "assets/bg/bg20.jpg", "c": "Cuernos del Paine · Pedro Szekely · CC BY-SA 2.0"}, {"f": "assets/bg/bg21.jpg", "c": "Aurora in Abisko · Pavel.shyshkouski · CC BY-SA 4.0"}, {"f": "assets/bg/bg22.jpg", "c": "Tre Cime di Lavaredo · Wolfgang Moroder · CC BY-SA 3.0"}];
   // Or a short muted loop (1080p H.264 .mp4 is safest on this TV): const BG_VIDEO = 'assets/bg/scenic.mp4';
   const BG_VIDEO = '';
   (function () {
@@ -635,7 +637,7 @@
       if (!g.results) return;
       const r = g.results[0];
       const w = await (await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + r.latitude + '&longitude=' + r.longitude +
-        '&current=temperature_2m,weather_code,is_day&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=6')).json();
+        '&current=temperature_2m,weather_code,is_day&hourly=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=2')).json();
       const cur = w.current, d = w.daily;
       const hrNow = w.hourly.time.findIndex(t => t >= cur.time.slice(0, 13));
       let hours = '';
@@ -643,16 +645,10 @@
         const hh = new Date(w.hourly.time[i]).getHours();
         hours += '<div><span>' + (hh % 12 || 12) + (hh >= 12 ? 'pm' : 'am') + '</span>' + svg(kind(w.hourly.weather_code[i], w.hourly.is_day[i])) + '<b>' + Math.round(w.hourly.temperature_2m[i]) + '°</b></div>';
       }
-      const lo = Math.min.apply(null, d.temperature_2m_min.slice(0, 6)), hi = Math.max.apply(null, d.temperature_2m_max.slice(0, 6));
-      let days = '';
-      for (let i = 1; i < 6; i++) {
-        days += '<div class="day"><span>' + new Date(d.time[i]).toLocaleDateString('en-GB', { weekday: 'short' }) + '</span>' + svg(kind(d.weather_code[i], 1)) +
-          '<b>' + Math.round(d.temperature_2m_max[i]) + '°</b><span class="lo">' + Math.round(d.temperature_2m_min[i]) + '°</span></div>';
-      }
-      const el = document.getElementById('wx');
+      const el = document.getElementById('wx');   // today only: now, today's high/low and the next few hours
       el.innerHTML = '<div class="top"><div><div class="city">' + r.name + '</div><div class="cond">' + wxLabel(cur.weather_code) + '</div><div class="temp">' + Math.round(cur.temperature_2m) + '°</div></div>' +
         '<div><div class="big">' + svg(kind(cur.weather_code, cur.is_day)) + '</div><div class="hl">H:' + Math.round(d.temperature_2m_max[0]) + '°  L:' + Math.round(d.temperature_2m_min[0]) + '°</div></div></div>' +
-        '<hr><div class="hours">' + hours + '</div><hr><div class="days">' + days + '</div>';
+        '<hr><div class="hours">' + hours + '</div>';
       el.classList.add('on');
     } catch (e) {}
   }
@@ -719,7 +715,8 @@
     const tr = el.parentElement;
     if (tr.classList.contains('track')) {
       const W = window.innerWidth, dOf = (c) => W * 0.204;
-      const x = tr._x || 0, vis = tr.parentElement.clientWidth, gap = W * 0.005;
+      const box = tr.parentElement, bs = getComputedStyle(box);   // the row's visible width, inside its padding
+      const x = tr._x || 0, vis = box.clientWidth - parseFloat(bs.paddingLeft) - parseFloat(bs.paddingRight), gap = W * 0.005;
       // layout after the previous card collapses and this one expands
       const before = (prevExp && prevExp !== el && prevExp.parentElement === tr && prevExp.offsetLeft < el.offsetLeft) ? dOf(prevExp) : 0;
       const left = el.offsetLeft - before + x;
@@ -932,7 +929,7 @@
       if (d.week) document.getElementById('topTitle').textContent = '';
       layoutNumbers();
       rows.length = 1;
-      [cont, picks, bec, rec, top].forEach((list) => { if (list.length) { rows.push(list); wire(list, rows.length - 1); } });
+      [top, cont, picks, bec, rec].forEach((list) => { if (list.length) { rows.push(list); wire(list, rows.length - 1); } });   // same order as on screen
       rows.push(hdEls);
       if (force && row >= 1) { const r = Math.min(row, rows.length - 1); go(r, Math.min(col, rows[r].length - 1)); }
       else if (row >= 1) row = rows.length - 1;   // you were on the inputs row while the shows were still loading

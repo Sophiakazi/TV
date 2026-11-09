@@ -103,5 +103,89 @@
   "file": "assets/bg/bg10.jpg",
   "credit": "Photo: Berchtesgaden 02 · Dmytro Balkhovitin · CC BY-SA 4.0",
   "thumb": "thumbs/bg10.jpg"
+ },
+ {
+  "id": "photo-11",
+  "name": "Lofoten Northern Lights",
+  "file": "assets/bg/bg11.jpg",
+  "credit": "Photo: Lofoten, Norway · Johannes Groll · CC0",
+  "thumb": "thumbs/bg11.jpg"
+ },
+ {
+  "id": "photo-12",
+  "name": "Seceda, Dolomites",
+  "file": "assets/bg/bg12.jpg",
+  "credit": "Photo: Odles da Secëda · Wolfgang Moroder · CC BY-SA 3.0",
+  "thumb": "thumbs/bg12.jpg"
+ },
+ {
+  "id": "photo-13",
+  "name": "Kirkjufell, Iceland",
+  "file": "assets/bg/bg13.jpg",
+  "credit": "Photo: Kirkjufell, Iceland · Jakub Hałun · CC BY 4.0",
+  "thumb": "thumbs/bg13.jpg"
+ },
+ {
+  "id": "photo-14",
+  "name": "Matterhorn",
+  "file": "assets/bg/bg14.jpg",
+  "credit": "Photo: Matterhorn from Grindjisee · Roy Egloff · CC BY-SA 4.0",
+  "thumb": "thumbs/bg14.jpg"
+ },
+ {
+  "id": "photo-15",
+  "name": "Geirangerfjord",
+  "file": "assets/bg/bg15.jpg",
+  "credit": "Photo: Geirangerfjord from Ørnesvingen · Ximonic (Simo Räsänen) · CC BY-SA 3.0",
+  "thumb": "thumbs/bg15.jpg"
+ },
+ {
+  "id": "photo-16",
+  "name": "Yosemite Valley",
+  "file": "assets/bg/bg16.jpg",
+  "credit": "Photo: Tunnel View, Yosemite · Diliff · CC BY-SA 3.0",
+  "thumb": "thumbs/bg16.jpg"
+ },
+ {
+  "id": "photo-17",
+  "name": "Santorini",
+  "file": "assets/bg/bg17.jpg",
+  "credit": "Photo: Three domes of Oia, Santorini · Giles Laurent · CC BY-SA 4.0",
+  "thumb": "thumbs/bg17.jpg"
+ },
+ {
+  "id": "photo-18",
+  "name": "Mount Fuji",
+  "file": "assets/bg/bg18.jpg",
+  "credit": "Photo: Mount Fuji at sunset · Romain Guy · CC0",
+  "thumb": "thumbs/bg18.jpg"
+ },
+ {
+  "id": "photo-19",
+  "name": "Isle of Skye",
+  "file": "assets/bg/bg19.jpg",
+  "credit": "Photo: Quiraing, Isle of Skye · Diliff · CC BY-SA 3.0",
+  "thumb": "thumbs/bg19.jpg"
+ },
+ {
+  "id": "photo-20",
+  "name": "Torres del Paine",
+  "file": "assets/bg/bg20.jpg",
+  "credit": "Photo: Cuernos del Paine · Pedro Szekely · CC BY-SA 2.0",
+  "thumb": "thumbs/bg20.jpg"
+ },
+ {
+  "id": "photo-21",
+  "name": "Abisko Northern Lights",
+  "file": "assets/bg/bg21.jpg",
+  "credit": "Photo: Aurora in Abisko · Pavel.shyshkouski · CC BY-SA 4.0",
+  "thumb": "thumbs/bg21.jpg"
+ },
+ {
+  "id": "photo-22",
+  "name": "Tre Cime, Dolomites",
+  "file": "assets/bg/bg22.jpg",
+  "credit": "Photo: Tre Cime di Lavaredo · Wolfgang Moroder · CC BY-SA 3.0",
+  "thumb": "thumbs/bg22.jpg"
  }
 ]

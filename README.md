@@ -44,7 +44,9 @@ The TV page talks to the remote server at the address in `REMOTE_URL` in `tv-hom
 
 ## Credits
 
-- Background photos are from Wikimedia Commons, under CC BY-SA 3.0 and 4.0. Each photographer is credited in `BG_IMAGES` in `tv-home/index.html`, and the credit shows on screen.
+- Background photos are from Wikimedia Commons, under CC BY-SA 2.0 to 4.0, CC BY 4.0 and CC0. They have been resized and cropped to 3840×2160.
+  - Each photographer is credited in `BG_IMAGES` in `tv-home/index.html`, and the credit shows on screen.
+  - Source links for the newer photos are in [CREDITS.md](CREDITS.md).
 - Fonts are licensed under the SIL Open Font License 1.1:
   - Barlow Condensed, © 2017 The Barlow Project Authors
   - Nunito, © 2014 The Nunito Project Authors
