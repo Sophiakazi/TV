@@ -9,6 +9,7 @@ const LGTV = require('lgtv2');
 const { getShows, tmdbInfo } = require('./shows');
 const watching = require('./watching');
 const foryou = require('./foryou');
+const netflix = require('./netflix');
 
 const PORT = Number(process.env.PORT || 8787);
 const CONFIG = path.join(__dirname, 'config.json');
@@ -187,6 +188,39 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '
 
 function send(res, code, obj) { res.writeHead(code, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify(obj)); }
 
+// /img?w=500&u=<picture link>: a shrunk copy of a show picture. TVmaze sends its pictures at full size
+// (up to 5 megapixels), and unpacking dozens of those froze the TV, so the Mac shrinks them once
+// with macOS's `sips` and keeps the small copies in ~/Library/Caches/tv-remote.
+const IMG_DIR = path.join(os.homedir(), 'Library', 'Caches', 'tv-remote');
+const IMG_HOSTS = ['static.tvmaze.com', 'image.tmdb.org'];
+const imgBusy = new Map();
+function smallImage(url, res) {
+  let src;
+  try { src = new URL(url.searchParams.get('u') || ''); } catch (e) { res.writeHead(400); return res.end(); }
+  const w = Math.max(100, Math.min(1920, parseInt(url.searchParams.get('w'), 10) || 500));
+  if (src.protocol !== 'https:' || !IMG_HOSTS.includes(src.hostname)) { res.writeHead(400); return res.end(); }
+  const file = path.join(IMG_DIR, require('crypto').createHash('sha1').update(src.href + '|' + w).digest('hex') + '.jpg');
+  const serve = () => fs.readFile(file, (err, buf) => {
+    if (err) { res.writeHead(302, { Location: src.href }); return res.end(); }   // couldn't shrink it: send the original
+    res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=2592000', 'Access-Control-Allow-Origin': '*' });
+    res.end(buf);
+  });
+  if (fs.existsSync(file)) return serve();
+  if (!imgBusy.has(file)) {
+    imgBusy.set(file, (async () => {
+      fs.mkdirSync(IMG_DIR, { recursive: true });
+      const r = await fetch(src.href, { signal: AbortSignal.timeout(20000) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const tmp = file + '.' + process.pid + '.src';
+      fs.writeFileSync(tmp, Buffer.from(await r.arrayBuffer()));
+      await new Promise((ok, no) => require('child_process').execFile('/usr/bin/sips',
+        ['-Z', String(w), '-s', 'format', 'jpeg', '-s', 'formatOptions', '80', tmp, '--out', file], (e) => (e ? no(e) : ok())));
+      fs.unlinkSync(tmp);
+    })().catch(() => {}).finally(() => imgBusy.delete(file)));
+  }
+  imgBusy.get(file).then(serve);
+}
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://x');
   if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'GET, POST' }); return res.end(); }
@@ -198,6 +232,13 @@ const server = http.createServer((req, res) => {
   if (req.method === 'GET' && url.pathname === '/api/showsearch') { watching.search(url.searchParams.get('q')).then((r) => send(res, 200, r)).catch(() => send(res, 200, [])); return; }
   if (req.method === 'GET' && url.pathname === '/api/shows') {
     Promise.all([getShows(), watching.cards(tmdbInfo), foryou.build(watching.load()).catch(() => null)])
+      .then(async ([d, w, fy]) => {
+        // Netflix IDs, so the TV can open each Netflix show directly instead of just the Netflix app
+        const onNetflix = [].concat(d.top10 || [], (w || []).filter((s) => s.service === 'netflix'),
+          ((fy && fy.picks) || []).concat((fy && fy.because && fy.because.items) || []).filter((p) => p.service === 'netflix'));
+        await netflix.addIds(onNetflix, (s) => s.tmdbId || (s.poster !== undefined ? s.id : null)).catch(() => {});
+        return [d, w, fy];
+      })
       .then(([d, w, fy]) => send(res, 200, Object.assign({}, d, { watching: w, forYou: fy, recommended: foryou.rankRecommended(d.recommended || [], fy) })))
       .catch((e) => send(res, 502, { error: String(e.message || e) }));
     return;
@@ -217,6 +258,7 @@ const server = http.createServer((req, res) => {
       'onStateChange:function(e){if(e.data===1){parent.postMessage({yt:"playing"},"*");}if(e.data===0){e.target.playVideo();}}}});}' +
       '</script><script src="https://www.youtube.com/iframe_api"></script>');
   }
+  if (req.method === 'GET' && url.pathname === '/img') return smallImage(url, res);
   if (req.method === 'GET' && url.pathname === '/api/bgs') return send(res, 200, { current: bgSel.id, list: BACKGROUNDS.map(({ id, name, thumb }) => ({ id, name, thumb })) });
   if (url.pathname === '/api/status') return send(res, 200, Object.assign({ host: config.host || config.url || null }, state));
   if (req.method === 'POST' && url.pathname.startsWith('/api/')) {

@@ -13,26 +13,26 @@
   }
 
   /* ---- wallpaper: desert at dusk (swap for a real photo with: background: url(photo.jpg) center/cover) ---- */
-  .wall { position: fixed; inset: 0; z-index: 0;
+  .wall { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0;
     background:
       radial-gradient(60vw 12vh at 46% 55%, rgba(255,255,255,.9), rgba(255,220,160,.5) 30%, transparent 70%),
       radial-gradient(90vw 30vh at 20% 82%, #7a3d22 0%, transparent 70%),
       radial-gradient(70vw 26vh at 85% 70%, #a8552b 0%, transparent 70%),
       linear-gradient(180deg, #2f6cb8 0%, #6e9bd0 28%, #bcd0e6 46%, #e7b98a 55%, #c4703a 62%, #8c4526 80%, #4f2616 100%);
   }
-  .wall::before { content: ""; position: absolute; inset: 0; opacity: .5;
+  .wall::before { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; opacity: .5;
     background:
       radial-gradient(40vw 7vh at 25% 18%, rgba(255,255,255,.55), transparent 70%),
       radial-gradient(50vw 8vh at 60% 26%, rgba(255,255,255,.4), transparent 70%),
       radial-gradient(35vw 6vh at 85% 14%, rgba(255,255,255,.35), transparent 70%); }
-  .wall::after { content: ""; position: absolute; inset: 0;
+  .wall::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
     background: linear-gradient(180deg, rgba(0,0,0,.25), transparent 22%, transparent 55%, rgba(0,0,0,.45)); }
 
   /* optional photo slideshow + looping video (set in the script below) */
-  .bgimg { position: fixed; inset: 0; z-index: 0; background: center / cover no-repeat; opacity: 0; transition: opacity 2.5s ease; }
+  .bgimg { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; background: center / cover no-repeat; opacity: 0; transition: opacity 2.5s ease; }
   .bgimg.on { opacity: 1; }
-  #bgv { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
-  .bgimg::after { content: ""; position: absolute; inset: 0;
+  #bgv { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  .bgimg::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
     background: linear-gradient(180deg, rgba(0,0,0,.25), transparent 22%, transparent 55%, rgba(0,0,0,.45)); }
 
   .screen { position: relative; z-index: 1; height: 100%; }
@@ -69,7 +69,7 @@
   .hint { position: absolute; left: 6.8vw; bottom: 1.2vh; font-size: 1.3vw; opacity: .8; text-shadow: 0 .1vw .5vw rgba(0,0,0,.4); }
   .name { display: none; position: absolute; bottom: 5.8vh; left: 43vw; font-size: 1.5vw; font-weight: 500; opacity: 0; transition: opacity .2s; text-shadow: 0 .1vw .5vw rgba(0,0,0,.5); }
   /* ---- No Signal screen (shows when the TV is offline) ---- */
-  .nosig { position: fixed; inset: 0; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  .nosig { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center;
     background: rgba(8,10,18,.55); -webkit-backdrop-filter: blur(40px) saturate(1.4); backdrop-filter: blur(40px) saturate(1.4); }
   .nosig.on { display: flex; animation: nsin .4s ease; }
   @keyframes nsin { from { opacity: 0; } to { opacity: 1; } }
@@ -108,7 +108,7 @@
   .chip svg { width: 1.7vw; height: 1.7vw; }
   .chip:focus, .chip.focus { transform: scale(1.1); background: rgba(255,255,255,.3); box-shadow: 0 .8vw 2vw rgba(0,0,0,.35), 0 0 0 .18vw #fff; }
   /* ---- second screen: recommendations ---- */
-  .pager { position: fixed; inset: 0; z-index: 1; transition: transform .75s cubic-bezier(.2,.8,.2,1); }
+  .pager { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 1; transition: transform .75s cubic-bezier(.2,.8,.2,1); }
   .pager.p2 { transform: translateY(-100%); }
   .screen2 { position: absolute; left: 0; right: 0; top: 100%; height: 100%; padding: 4.2vh 4.5vw 0; overflow: hidden; }
   .screen2 h2 { font-size: 1.8vw; font-weight: 600; margin: 0 0 .6vh; text-shadow: 0 .1vw .8vw rgba(0,0,0,.4); }
@@ -117,7 +117,7 @@
   .card { position: relative; flex: 0 0 9.6vw; width: 9.6vw; min-width: 0; text-decoration: none; color: #fff; outline: none; transition: transform .22s cubic-bezier(.2,.8,.2,1); }
   .card .poster { width: 9.6vw; height: 14.2vw; border-radius: 1.2vw; overflow: hidden; background: linear-gradient(160deg,#3a3f6b,#1a1c33); position: relative;
     box-shadow: 0 .8vw 2vw rgba(0,0,0,.35); display: grid; place-items: center; text-align: center; padding: 1vw; font-weight: 600; font-size: 1.3vw; }
-  .card .poster img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .card .poster img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
   .card b { display: block; margin-top: 1vh; font-size: 1.15vw; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 .1vw .5vw rgba(0,0,0,.5); }
   .card span.sub { display: none; font-size: .95vw; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 .1vw .5vw rgba(0,0,0,.5); }
   .card:focus, .card.focus { transform: scale(1.08); z-index: 3; }
@@ -137,7 +137,7 @@
   .t10 small { font-size: .55vw; font-weight: 800; letter-spacing: .06em; } .t10 b { font-size: 1.25vw; font-weight: 900; }
   .nflx { color: #e50914; font-weight: 900; margin-right: -.3vw; }
   /* frosted glass over the background on the recommendations screen */
-  .frost { position: fixed; inset: 0; z-index: 0; opacity: 0; pointer-events: none; transition: opacity .75s ease;
+  .frost { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; opacity: 0; pointer-events: none; transition: opacity .75s ease;
     -webkit-backdrop-filter: blur(46px) saturate(1.35) brightness(.8); backdrop-filter: blur(46px) saturate(1.35) brightness(.8); background: rgba(12,14,24,.28); }
   .frost.on { opacity: 1; }
   .card .ch { position: absolute; left: .6vw; top: .6vw; z-index: 2; max-width: 8.2vw; padding: .25vw .7vw; border-radius: 99px; font-style: normal; font-size: .85vw; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -181,7 +181,7 @@
     transition: opacity .3s ease, transform .3s cubic-bezier(.2,.8,.2,1); pointer-events: none; box-shadow: 0 1.4vw 4vw rgba(0,0,0,.65); }
   .pop.on { opacity: 1; transform: scale(1); }
   .pop .pm { position: relative; width: 100%; padding-top: 56.25%; background: #222; }
-  .pop .pm img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pop .pm img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
   .pop .pm::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(transparent, #181818); pointer-events: none; }
   .pop .pm .pv { left: 0; width: 100%; transform: none; }
   .pop .pi { padding: .9vw 1.2vw 1.2vw; }
@@ -201,7 +201,7 @@
   /* landscape cards (Continue watching + Recommended) */
   .card.wide { flex: 0 0 12.4vw; width: 12.4vw; }
   .card.wide .poster { width: 12.4vw; height: 6.98vw; padding: 0; }
-  .card.wide .poster::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 45%, rgba(0,0,0,.72)); pointer-events: none; }
+  .card.wide .poster::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(transparent 45%, rgba(0,0,0,.72)); pointer-events: none; }
   .card.wide b { position: absolute; left: .7vw; right: .7vw; bottom: .5vw; margin: 0; z-index: 2; font-size: .92vw; font-weight: 600; text-shadow: 0 .1vw .5vw rgba(0,0,0,.7); }
   .card.wide span.sub { display: none; }
   .card.wide .rowfix { display: none; }
@@ -217,7 +217,7 @@
   .card.exp .poster img.bk { opacity: 1; }
   .card .nl { position: absolute; right: .7vw; top: .6vw; width: 1.15vw; height: 1.7vw; z-index: 3; opacity: 0; transition: opacity .3s; filter: drop-shadow(0 .1vw .3vw rgba(0,0,0,.5)); }
   .card.exp .nl { opacity: 1; }
-  .card .poster .pv { display: block; position: absolute; inset: 0; left: 0; top: 0; width: 100%; height: 100%; transform: none; z-index: 2; }
+  .card .poster .pv { display: block; position: absolute; top: 0; right: 0; bottom: 0; left: 0; left: 0; top: 0; width: 100%; height: 100%; transform: none; z-index: 2; }
   .card .cap { display: block; height: 5.4vh; margin-top: 1vh; opacity: 0; transition: opacity .3s; }
   .card.exp .cap { opacity: 1; }
   .card .cap b, .card.top .cap b { display: block !important; margin: 0; font-size: 1.1vw; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 .1vw .5vw rgba(0,0,0,.5); }
@@ -242,9 +242,9 @@
     box-shadow: inset 0 .1vw .25vw rgba(255,255,255,.75), inset 0 -.15vw .35vw rgba(255,255,255,.28), inset 0 0 0 .08vw rgba(255,255,255,.3), 0 .9vw 2.2vw rgba(0,0,0,.28); }
   body[data-icons="glass"] .shelf .item:focus, body[data-icons="glass"] .shelf .item.focus { box-shadow: inset 0 .1vw .25vw rgba(255,255,255,.75), 0 1.4vw 3vw rgba(0,0,0,.5), 0 0 0 .22vw #fff; }
   body[data-icons="glass"] .shelf .item img { opacity: .72; filter: saturate(1.25) brightness(1.12) contrast(1.05); }
-  body[data-icons="glass"] .shelf .item::before { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  body[data-icons="glass"] .shelf .item::before { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 3; pointer-events: none;
     background: linear-gradient(135deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 38%, rgba(255,255,255,0) 62%, rgba(255,255,255,.22) 100%); }
-  body[data-tint="on"] .shelf .item::after { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: var(--tint); mix-blend-mode: color; opacity: .92; }
+  body[data-tint="on"] .shelf .item::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 2; pointer-events: none; background: var(--tint); mix-blend-mode: color; opacity: .92; }
   body[data-tint="on"] .shelf .item img { filter: grayscale(.35) contrast(1.05); }
   body[data-tint="on"][data-icons="glass"] .shelf .item img { filter: grayscale(.35) saturate(1.25) brightness(1.12) contrast(1.05); }
   /* bigger cards, rows closer together */
@@ -340,7 +340,7 @@
   .card .cap b, .card .cap span { text-shadow: none !important; }
   .card .nl { filter: none; }
   /* white outline drawn on the card's own edge, above the picture/trailer */
-  .card .poster::before { content: ""; position: absolute; inset: 0; z-index: 5; border-radius: inherit; pointer-events: none;
+  .card .poster::before { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 5; border-radius: inherit; pointer-events: none;
     box-shadow: inset 0 0 0 .22vw rgba(255,255,255,0); transition: box-shadow .25s ease; }
   .card.exp .poster::before { box-shadow: inset 0 0 0 .22vw rgba(255,255,255,.96); }
   /* Top 10 numbers like Netflix: thin light outline only, about 42% of the poster's height, level with its top,
@@ -376,16 +376,16 @@
   .card .prog { position: absolute; left: 0; right: 0; bottom: 0; height: .36vw; background: rgba(255,255,255,.3); z-index: 4; }
   .card .prog b { display: block; height: 100%; background: #e50914; }
   .card.exp .prog { left: .22vw; right: .22vw; bottom: .22vw; }   /* inside the white outline */
-  .card .poster img.svc { inset: auto; right: .55vw; top: .55vw; left: auto; bottom: auto; width: 2vw; height: 2vw; border-radius: .45vw; z-index: 4; object-fit: cover; opacity: 1 !important; }
+  .card .poster img.svc { top: auto; right: auto; bottom: auto; left: auto; right: .55vw; top: .55vw; left: auto; bottom: auto; width: 2vw; height: 2vw; border-radius: .45vw; z-index: 4; object-fit: cover; opacity: 1 !important; }
   .card .newb { position: absolute; left: .55vw; top: .55vw; z-index: 4; font-style: normal; font-size: .8vw; font-weight: 700; padding: .25vw .6vw; border-radius: .35vw; background: #e50914; color: #fff; }
   .card.cont .nl { opacity: 1; }
   .cwkeys { font-size: .95vw !important; opacity: .7 !important; margin-left: 1.4vw !important; }
   .cwkeys i { display: inline-block; width: .7vw; height: .7vw; border-radius: 50%; margin: 0 .4vw 0 .9vw; vertical-align: middle; }
   /* ===== the selected show's picture fills the background, dimmed (Apple TV / Netflix style) ===== */
-  .hero { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  .hero div { position: absolute; inset: 0; background: center / cover no-repeat; opacity: 0; transition: opacity .8s ease; }
+  .hero { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; pointer-events: none; }
+  .hero div { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: center / cover no-repeat; opacity: 0; transition: opacity .8s ease; }
   .hero div.on { opacity: .62; }
-  .hero::after { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .8s ease;
+  .hero::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; opacity: 0; transition: opacity .8s ease;
     background: linear-gradient(90deg, rgba(8,10,18,.78) 0%, rgba(8,10,18,.3) 55%, rgba(8,10,18,.55) 100%), linear-gradient(0deg, rgba(8,10,18,.72), rgba(8,10,18,0) 60%); }
   body.herook .hero::after { opacity: 1; }
   /* ===== Switch tile when it's off, and small messages on the TV ===== */
@@ -420,6 +420,20 @@
   .pager.p2 .screen2, .pager.p3 .screen3 { opacity: 1; transition: opacity .75s ease .12s; }
   /* Inputs: room around the row so the selected tile (it grows a little) keeps its edges, white ring and shadow */
   .screen3 .rowbox { padding: 2.1vw 3vw 3.6vw !important; margin: 0 -3vw !important; }
+  /* light mode (the TV): a plain white clock instead of the glass one */
+  body.lite .info .time { -webkit-text-fill-color: #fff !important; color: #fff; line-height: .9 !important;
+    font-family: "Barlow Condensed", "Arial Narrow", sans-serif; font-weight: 700; font-size: 15vw; letter-spacing: 0;
+    text-shadow: 0 .3vw 1.6vw rgba(0,0,0,.28); }
+  body.lite.saver .info .time { font-size: 21vw; }
+  /* light mode: up/down is just a quick slide. Cards open at once instead of growing (growing re-lays
+     out the whole row on every frame), and the big picture behind fades faster */
+  body.lite { --pg: .5s; }   /* page glides: keep in step with PAGE_MS */
+  body.lite .s2in { transition: transform .28s cubic-bezier(.25,.8,.25,1); }
+  /* while you're on the shows or inputs page the wallpaper is covered, so the TV stops drawing it */
+  body.lite.deep.herook .wall, body.lite.deep.herook .bgimg, body.lite.deep.herook #bgv { visibility: hidden; }
+  body.lite.deep.herook .hero div.on { opacity: .8; }   /* a bit stronger, as there's no wallpaper under it now */
+  body.lite .card, body.lite .card .poster { transition: none !important; }
+  body.lite .hero div, body.lite .hero::after { transition: opacity .3s ease; }
 </style>
 </head>
 <body>
@@ -502,7 +516,61 @@
   <p>Check your Wi-Fi or internet connection</p>
   <div class="dots"><span></span><span></span><span></span></div>
 </div>
-<script src="clock.js?v=8"></script>
+<script>
+  // Light mode for the TV: its built-in browser (Chrome 68) can't keep up with the glass clock or
+  // trailers playing inside the cards, so on the TV the clock is plain white digits and trailers wait until you rest on a show.
+  // Force it with ?lite=1 (or ?lite=0 for the full look).
+  window.LITE = (function () { var q = new URLSearchParams(location.search).get('lite'); return q ? q === '1' : /Web0S|webOS/i.test(navigator.userAgent); })();
+  if (window.LITE) document.body.classList.add('lite');
+  else document.write('<script src="clock.js?v=8"><\/script>');
+</script>
+<script>
+  // The TV's browser (Chrome 68) ignores `gap` in flex rows, so items would touch.
+  // Where that's the case, give each item after the first a margin the size of the gap instead.
+  (function () {
+    var t = document.createElement('div');
+    t.style.cssText = 'display:flex;flex-direction:column;row-gap:1px;position:absolute';
+    t.appendChild(document.createElement('div')); t.appendChild(document.createElement('div'));
+    document.body.appendChild(t); var ok = t.scrollHeight === 1; t.remove();
+    if (ok) return;
+    // Only rows that changed are looked at again (a full pass over the page on every keypress made it slow).
+    function fixOne(box) {
+        var c = getComputedStyle(box);
+        if (c.display !== 'flex' && c.display !== 'inline-flex') return;
+        var col = c.flexDirection.indexOf('column') === 0;
+        var g = parseFloat(col ? c.rowGap : c.columnGap) || 0;
+        if (!g) return;
+        var side = col ? 'marginTop' : 'marginLeft', first = true;
+        for (var k = box.firstElementChild; k; k = k.nextElementSibling) {
+          if (getComputedStyle(k).position === 'absolute' || getComputedStyle(k).display === 'none') continue;
+          var want = first ? '' : g + 'px';
+          if (k.dataset.gapFix !== want) {
+            if (k.dataset.gapFix === undefined) { k.dataset.gapBase = k.style[side]; k.dataset.gapCss = getComputedStyle(k)[side]; }
+            k.style[side] = want ? 'calc(' + k.dataset.gapCss + ' + ' + want + ')' : k.dataset.gapBase;
+            k.dataset.gapFix = want;
+          }
+          first = false;
+        }
+    }
+    function fixAll(root) { fixOne(root); var els = root.getElementsByTagName('*'); for (var i = 0; i < els.length; i++) fixOne(els[i]); }
+    var todo = [], queued = false;
+    function run() {
+      queued = false; var list = todo; todo = [];
+      for (var i = 0; i < list.length; i++) if (list[i].isConnected) { if (list[i].nodeType === 1 && list[i].firstElementChild) (list[i]._gapAll ? fixAll : fixOne)(list[i]); }
+    }
+    new MutationObserver(function (ms) {
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i]; if (m.type !== 'childList') continue;
+        var hasEl = false;
+        for (var j = 0; j < m.addedNodes.length; j++) if (m.addedNodes[j].nodeType === 1) { hasEl = true; m.addedNodes[j]._gapAll = true; todo.push(m.addedNodes[j]); }
+        for (j = 0; j < m.removedNodes.length; j++) if (m.removedNodes[j].nodeType === 1) hasEl = true;
+        if (hasEl) todo.push(m.target);   // text-only changes (labels, the clock) never affect spacing
+      }
+      if (todo.length && !queued) { queued = true; requestAnimationFrame(run); }
+    }).observe(document.body, { childList: true, subtree: true });
+    fixAll(document.body);
+  })();
+</script>
 <script>
   // ---- background: video wins, else photo slideshow, else the painted scene ----
   // Put 4K photos (3840x2160 .jpg) in assets/bg/ and list them here, e.g. ['assets/bg/desert.jpg', 'assets/bg/coast.jpg']
@@ -554,9 +622,17 @@
   const REMOTE_URL = new URLSearchParams(location.search).get('remote') || 'http://192.168.178.116:8787';
   (function () {
     let last = 0;
+    // Only redo a setting when it has changed: re-applying them every 3 seconds made the TV redraw
+    // the whole page and the glass clock each time, which slowed it to a crawl.
+    const seen = {};
+    const changed = (k, v) => { const s = JSON.stringify(v); if (seen[k] === s) return false; seen[k] = s; return true; };
     const poll = () => {
       fetch(REMOTE_URL + '/api/bg').then(r => r.json()).then(j => {
-        setIcons(j.icons); setClock(j.clock); setSwitch(j.switch); setConsole('psTile', j.playstation); setInputs(j.inputs);
+        if (changed('icons', j.icons)) setIcons(j.icons);
+        if (changed('clock', j.clock)) setClock(j.clock);
+        if (changed('switch', j.switch)) setSwitch(j.switch);
+        if (changed('ps', j.playstation)) setConsole('psTile', j.playstation);
+        if (changed('inputs', j.inputs)) setInputs(j.inputs);
         window.__bgSel = j;
         if (j.v !== last) { const first = last === 0; last = j.v; if (!first || j.id !== 'auto') window.setBgFromRemote && window.setBgFromRemote(j); }
       }).catch(() => {});
@@ -601,6 +677,7 @@
   function tick() {
     const d = new Date(); let h = d.getHours(); const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12;
     if (window.GlassClock) GlassClock.setText(h + ':' + pad(d.getMinutes()));
+    else { const t = document.getElementById('time'), s = h + ':' + pad(d.getMinutes()); if (t.textContent !== s) t.textContent = s; }
     const hr = d.getHours();
     document.getElementById('hello').textContent =
       (hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening') + ', Sophia';
@@ -676,7 +753,10 @@
     if (!el.dataset.app) { if (el.dataset.provider) toast('Available on ' + el.dataset.provider); return; }
     if (window.PalmServiceBridge) {
       const b = new PalmServiceBridge();
-      b.call('luna://com.webos.applicationManager/launch', JSON.stringify({ id: el.dataset.app }));
+      const go = { id: el.dataset.app };
+      // a Netflix show with a known ID opens on its own page in Netflix (after the "Who's watching?" screen)
+      if (el.dataset.app === 'netflix' && /^\d+$/.test(el.dataset.nfx || '')) go.params = { contentTarget: 'm=https://www.netflix.com/title/' + el.dataset.nfx + '&source_type=4' };
+      b.call('luna://com.webos.applicationManager/launch', JSON.stringify(go));
     } else if (el.dataset.url) {
       window.location.href = el.dataset.url;
     }
@@ -689,7 +769,7 @@
   const pager = document.getElementById('pager');
   let pvTimer = null, pvEl = null, expEl = null;
   let row = 0, col = 0, page = 0, openTimer = null, foldTimer = null;
-  const PAGE_MS = 900;   // how long the page glides (keep in step with --pg in the CSS)
+  const PAGE_MS = window.LITE ? 500 : 900;   // how long the page glides (keep in step with --pg in the CSS; quicker on the TV)
   const go = (r, c) => {
     row = Math.max(0, Math.min(rows.length - 1, r));
     col = Math.max(0, Math.min(rows[row].length - 1, c));
@@ -712,6 +792,11 @@
     } else if (pg === 1) previewFor(el);
     else if (!isCard) setHero('');
     document.getElementById('frost').classList.toggle('on', pg >= 1);
+    if (window.LITE && moved) {   // stop drawing the wallpaper once the page has slid away from it; bring it back before sliding home
+      clearTimeout(go.deepT);
+      if (pg === 1) go.deepT = setTimeout(() => document.body.classList.add('deep'), PAGE_MS);
+      else document.body.classList.remove('deep');
+    }
     const tr = el.parentElement;
     if (tr.classList.contains('track')) {
       const W = window.innerWidth, dOf = (c) => W * 0.204;
@@ -780,14 +865,26 @@
   }
   // the selected show's picture behind the rows (cross-fades between shows)
   let heroTop = 0, heroUrl = '';
+  // On the TV, show pictures come shrunk from the Mac (/img): full-size TVmaze pictures froze it.
+  function pic(u, w) {
+    return window.LITE && /^https:\/\/(static\.tvmaze\.com|image\.tmdb\.org)\//.test(u || '') ? REMOTE_URL + '/img?w=' + w + '&u=' + encodeURIComponent(u) : u;
+  }
+  // On the TV the picture behind waits until you stop on a show, so flicking along a row doesn't swap
+  // a full-screen picture for every card you pass (each swap is heavy for its graphics chip).
+  let heroWait = null;
   function setHero(url) {
+    clearTimeout(heroWait);
+    if (window.LITE && url) { heroWait = setTimeout(() => setHeroNow(url), 350); return; }
+    setHeroNow(url);
+  }
+  function setHeroNow(url) {
     const h = document.getElementById('hero'); if (!h) return;
     url = url || '';
     if (url === heroUrl) return;
     heroUrl = url;
     const L = h.children;
     if (!url) { L[0].classList.remove('on'); L[1].classList.remove('on'); document.body.classList.remove('herook'); return; }
-    const nx = L[1 - heroTop]; nx.style.backgroundImage = 'url("' + url.replace(/"/g, '%22') + '")';
+    const nx = L[1 - heroTop]; nx.style.backgroundImage = 'url("' + pic(url, 1280).replace(/"/g, '%22') + '")';
     nx.classList.add('on'); L[heroTop].classList.remove('on'); heroTop = 1 - heroTop; document.body.classList.add('herook');
   }
 
@@ -795,6 +892,7 @@
   // Selected card expands inline into a landscape card; its trailer plays there after a short pause
   // If trailers misbehave on your TV, set PREVIEWS to false (or open the page with ?previews=0)
   const PREVIEWS = new URLSearchParams(location.search).get('previews') !== '0';
+  const PREVIEW_WAIT = window.LITE ? 2000 : 1100;   // on the TV a trailer only starts once you've rested on a show, so scrolling stays quick
   function hidePop() { clearTimeout(pvTimer); if (pvEl) { pvEl.remove(); pvEl = null; } if (expEl) { expEl.classList.remove('exp'); expEl = null; } }
   function previewFor(el) {
     clearTimeout(pvTimer);
@@ -811,9 +909,11 @@
         f.style.opacity = '0'; f.style.transition = 'opacity .7s'; f.tabIndex = -1;
         const keep = () => { try { window.focus(); el.focus({ preventScroll: true }); } catch (e) {} };   // the video must never steal the remote's keys
         f.addEventListener('load', keep);   // stays invisible until the player reports it is playing
+        // the TV's older browser never gets YouTube's "playing" signal although the video does play, so show it after a moment
+        if (window.LITE) f.addEventListener('load', () => setTimeout(() => { if (pvEl === f) f.style.opacity = '1'; }, 4000));
         poster.appendChild(f); pvEl = f; keep();
         const kt = setInterval(() => { if (pvEl !== f) clearInterval(kt); else if (document.activeElement === f) keep(); }, 400);
-      }, 1100);
+      }, PREVIEW_WAIT);
     }
   }
   window.addEventListener('message', (e) => {
@@ -839,7 +939,7 @@
   function makeCard(o) {
     const a = document.createElement('a');
     a.className = 'card' + (o.rank ? ' top' + (o.rank >= 10 ? ' ten' : '') : ' rec') + (o.cont ? ' cont' : '') + (o.pick ? ' pick' : ''); a.href = '#'; a.dataset.name = o.title; if (o.trailer) a.dataset.trailer = o.trailer;
-    if (o.app) a.dataset.app = o.app; if (o.find) a.dataset.find = o.find; if (o.key) a.dataset.key = o.key;
+    if (o.app) a.dataset.app = o.app; if (o.netflix) a.dataset.nfx = o.netflix; if (o.find) a.dataset.find = o.find; if (o.key) a.dataset.key = o.key;
     a.dataset.backdrop = o.backdrop || ''; a.dataset.poster = o.image || '';
     if (o.provider && !o.app && !o.find) a.dataset.provider = o.provider;
     const svc = { disney: 'disney', prime: 'prime', youtube: 'youtube', iplayer: 'iplayer', itvx: 'itvx' }[o.service];
@@ -848,8 +948,8 @@
     const nf = o.rank || o.app === 'netflix' || /netflix/i.test(o.channel || '');
     if (o.rank) a.dataset.rank = o.rank;
     a.innerHTML = (o.rank ? '<svg class="numsvg" aria-hidden="true"><text>' + o.rank + '</text></svg>' : '') +
-      '<div class="poster">' + (o.image ? '<img class="pp" loading="lazy" src="' + esc(o.image) + '" alt="">' : esc(o.title)) +
-      (o.backdrop ? '<img class="bk" loading="lazy" src="' + esc(o.backdrop) + '" alt="">' : '') +
+      '<div class="poster">' + (o.image ? '<img class="pp" loading="lazy" src="' + esc(pic(o.image, 600)) + '" alt="">' : esc(o.title)) +
+      (o.backdrop ? '<img class="bk" loading="lazy" src="' + esc(pic(o.backdrop, 800)) + '" alt="">' : '') +
       (nf ? '<svg class="nl" viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="28" y="4" width="15" height="92" fill="#a30b13"/><rect x="57" y="4" width="15" height="92" fill="#a30b13"/><polygon points="28,4 43,4 72,96 57,96" fill="#e50914"/></svg>' : '') +
       (svc && !nf ? '<img class="svc" src="assets/' + svc + '.jpg" alt="">' : '') +
       (o.badge ? '<em class="newb">' + esc(o.badge) + '</em>' : '') +
@@ -922,7 +1022,7 @@
       if (!force && sig === lastSig) return;          // nothing changed
       if (!force && row >= 1 && rows.length > 2) return;                  // don't rebuild while you're browsing; try again next time
       lastSig = sig;
-      const meta = (s) => ({ trailer: s.trailer, backdrop: s.backdrop, overview: s.overview, year: s.year, vote: s.vote, genre: s.genre, seasons: s.seasons, age: s.age });
+      const meta = (s) => ({ netflix: s.netflix, trailer: s.trailer, backdrop: s.backdrop, overview: s.overview, year: s.year, vote: s.vote, genre: s.genre, seasons: s.seasons, age: s.age });
       const svcLaunch = { netflix: { app: 'netflix' }, disney: { app: 'com.disney.disneyplus-prod' }, prime: { app: 'amazon' }, youtube: { app: 'youtube.leanback.v4' }, iplayer: { find: 'iplayer|bbc' }, itvx: { find: 'itv' } };
       const left = (s) => {
         if (!s.runtime) return '';
@@ -935,7 +1035,7 @@
       document.getElementById('contPanel').style.display = cont.length ? '' : 'none';
       const fy = d.forYou || {};
       const pickCard = (p) => makeCard(Object.assign({ title: p.name, image: p.poster, backdrop: p.backdrop, trailer: p.trailer, overview: p.overview, year: p.year,
-        pick: true, match: p.match, tags: p.tags, why: p.why, service: p.service, provider: p.provider }, svcLaunch[p.service] || {}));
+        pick: true, netflix: p.netflix, match: p.match, tags: p.tags, why: p.why, service: p.service, provider: p.provider }, svcLaunch[p.service] || {}));
       const picks = fill(document.getElementById('pickRow'), (fy.picks || []).map(pickCard));
       document.getElementById('pickPanel').style.display = picks.length ? '' : 'none';
       document.getElementById('pickWhy').textContent = fy.insight || '';

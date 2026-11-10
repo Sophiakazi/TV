@@ -32,7 +32,7 @@ async function tmdbInfo(name) {
     if (hit) {
       out = {
         backdrop: hit.backdrop_path ? 'https://image.tmdb.org/t/p/w780' + hit.backdrop_path : null,
-        overview: hit.overview || '', year: (hit.first_air_date || '').slice(0, 4), vote: hit.vote_average ? Math.round(hit.vote_average * 10) / 10 : null
+        tmdbId: hit.id, overview: hit.overview || '', year: (hit.first_air_date || '').slice(0, 4), vote: hit.vote_average ? Math.round(hit.vote_average * 10) / 10 : null
       };
       const [det, cr] = await Promise.all([
         fetch('https://api.themoviedb.org/3/tv/' + hit.id, { headers: h }).then((r) => r.json()).catch(() => ({})),
